@@ -1,0 +1,24 @@
+#ifndef __MESH_H__
+#define __MESH_H__
+
+extern const char *VERTEX_SOURCE;
+extern const char *FRAGMENT_SOURCE;
+
+struct mesh_t {
+	DWORD vao;
+	DWORD vbo;
+	const float *vertices;
+	GLsizei size;
+	GLsizei count;
+};
+
+void
+init_mesh_buffers(struct mesh_t *mesh);
+
+void
+render_mesh(struct mesh_t mesh);
+
+BOOL
+compile_shaders(DWORD *shader_program);
+
+#endif // !__MESH_H__
