@@ -51,14 +51,14 @@ render_mesh(struct mesh_t mesh)
 }
 
 BOOL
-compile_shaders(DWORD *shader_program)
+compile_shaders(GLuint *shader_program)
 {
-	DWORD vertex_shader;
+	GLuint vertex_shader;
 	vertex_shader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertex_shader, 1, &VERTEX_SOURCE, NULL);
 	glCompileShader(vertex_shader);
 
-	DWORD fragment_shader;
+	GLuint fragment_shader;
 	fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragment_shader, 1, &FRAGMENT_SOURCE, NULL);
 	glCompileShader(fragment_shader);

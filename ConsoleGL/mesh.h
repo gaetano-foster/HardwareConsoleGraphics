@@ -5,8 +5,8 @@ extern const char *VERTEX_SOURCE;
 extern const char *FRAGMENT_SOURCE;
 
 struct mesh_t {
-	DWORD vao;
-	DWORD vbo;
+	GLuint vao;
+	GLuint vbo;
 	const float *vertices;
 	GLsizei size;
 	GLsizei count;
@@ -19,6 +19,6 @@ void
 render_mesh(struct mesh_t mesh);
 
 BOOL
-compile_shaders(DWORD *shader_program);
+compile_shaders(GLuint *shader_program);
 
 #endif // !__MESH_H__
