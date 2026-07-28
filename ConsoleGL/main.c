@@ -2,10 +2,12 @@
 #include <glad/glad.h>
 #include <SDL.h>
 #include <Windows.h>
+#include <assert.h>
 #include "mesh.h"
 
 #define S_WIDTH		(120)
 #define S_HEIGHT	(40)
+
 #define EXPECT(B)								\
     do {										\
         if (!(B)) {								\
@@ -26,10 +28,33 @@ struct bgr_t {
 struct console_screen_t {
 	// buffers
 	CHAR_INFO *front_buffer;
+	BYTE	  *back_buffer;
 	// handles
 	HANDLE console_handle;
 	HANDLE original;
 };
+
+CHAR_INFO 
+bgr_to_ascii(struct bgr_t bgr) 
+{
+	const int MAX_VALUE = 765; // 255 + 255 + 255
+	// darkest to lightest characters
+	// TODO: adjust characters for luminance for more accurate lighting
+	const WCHAR *palette = L" `.-':_,^=;>+!rc/z?sLTv)J7(|F{CfI31tlu[neoZ5Yxjya2ESwkP6h9d4VpOGbUAXHm8RD#$Bg0MNWQ%&@@";
+	int value = bgr.b + bgr.g + bgr.r;
+	double percent = (double)value / (double)MAX_VALUE;
+
+	// normalize color values from pixel
+	BYTE b = bgr.b, g = bgr.g, r = bgr.r;
+	b = b < 127 ? 0 : FOREGROUND_BLUE;
+	g = g < 127 ? 0 : FOREGROUND_GREEN;
+	r = r < 127 ? 0 : FOREGROUND_RED;
+
+	return (CHAR_INFO) {
+		.Char.UnicodeChar = palette[(int)(percent * 85)],
+		.Attributes = r | g | b
+	};
+}
 
 BOOL
 init_window_and_context(SDL_Window **win,
@@ -48,7 +73,7 @@ init_window_and_context(SDL_Window **win,
 	}
 
 	// window width and height are scaled up because S_WIDTH and S_HEIGHT are the screen width/height in characters, not pixels
-	if (!(*win = SDL_CreateWindow("OpenGL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, S_WIDTH * 8, S_HEIGHT * 16, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN))) {
+	if (!(*win = SDL_CreateWindow("OpenGL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, S_WIDTH, S_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN))) {
 		fprintf(stderr, "Failed to create window: %s\n", SDL_GetError());
 		SDL_Quit();
 		return 0;
@@ -84,15 +109,26 @@ destroy_window_and_context(SDL_Window **win,
 BOOL
 init_console_screen(struct console_screen_t *screen)
 {
+	// store original screen
 	screen->original = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	// allocate front and back buffers
 	if (!(screen->front_buffer = malloc(sizeof(CHAR_INFO) * S_WIDTH * S_HEIGHT))) {
-		fprintf(stderr, "Failed to allocate memory for screen buffer.\n");
+		fprintf(stderr, "Failed to allocate memory for front buffer.\n");
 		return FALSE;
 	}
+	if (!(screen->back_buffer = malloc(3 * S_WIDTH * S_HEIGHT))) {
+		fprintf(stderr, "Failed to allocate memory for back buffer.\n");
+		free(screen->front_buffer);
+		return FALSE;
+	}
+
+	// create and focus console screen buffer
 	screen->console_handle = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
 	if (screen->console_handle == INVALID_HANDLE_VALUE) {
 		fprintf(stderr, "Failed to create console screen handle.\n");
 		free(screen->front_buffer);
+		free(screen->back_buffer);
 		return FALSE;
 	}
 	SetConsoleActiveScreenBuffer(screen->console_handle);
@@ -102,6 +138,20 @@ init_console_screen(struct console_screen_t *screen)
 void
 console_write_buffer(struct console_screen_t *screen)
 {
+	// write frame buffer data to screen buffer
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glReadBuffer(GL_FRONT);
+	glReadPixels(0, 0, S_WIDTH, S_HEIGHT, GL_BGR, GL_UNSIGNED_BYTE, screen->back_buffer);
+	struct bgr_t *buf = (struct bgr_t *)(screen->back_buffer);
+	// TODO: find better way of doing this
+	for (int y = 0; y < S_HEIGHT; y++) {
+		for (int x = 0; x < S_WIDTH; x++) {
+			screen->front_buffer[y * S_WIDTH + x] = bgr_to_ascii(buf[((S_HEIGHT - 1 - y) * S_WIDTH + x)]);
+		}
+	}
+	glPixelStorei(GL_PACK_ALIGNMENT, 4);
+	// write screen buffer data to console
 	SMALL_RECT write_region = { 0, 0, S_WIDTH - 1, S_HEIGHT - 1 };
 	WriteConsoleOutputW(
 		screen->console_handle, 
@@ -118,28 +168,7 @@ destroy_console_screen(struct console_screen_t *screen)
 	SetConsoleActiveScreenBuffer(screen->original);
 	CloseHandle(screen->console_handle);
 	free(screen->front_buffer);
-}
-
-CHAR_INFO 
-bgr_to_ascii(struct bgr_t bgr) 
-{
-	const int MAX_VALUE = 765; // 255 + 255 + 255
-	// darkest to lightest characters
-	// TODO: adjust characters for luminance for more accurate lighting
-	const WCHAR *palette = L" `.-':_,^=;>+!rc/z?sLTv)J7(|F{CfI31tlu[neoZ5Yxjya2ESwkP6h9d4VpOGbUAXHm8RD#$Bg0MNWQ%&@@";
-	int value = bgr.b + bgr.g + bgr.r;
-	double percent = (double)value / (double)MAX_VALUE;
-	
-	// normalize color values from pixel
-	BYTE b = bgr.b, g = bgr.g, r = bgr.r;
-	b = b < 127 ? 0 : FOREGROUND_BLUE;
-	g = g < 127 ? 0 : FOREGROUND_GREEN;
-	r = r < 127 ? 0 : FOREGROUND_RED;
-
-	return (CHAR_INFO) {
-		.Char.UnicodeChar = palette[(int)(percent * 85)],
-		.Attributes = r | g | b
-	};
+	free(screen->back_buffer);
 }
 
 int
@@ -153,12 +182,12 @@ main(int argc,
 	// main loop
 	BOOL running = TRUE;
 	// opengl data
-	DWORD shader_program;
+	GLuint shader_program;
 	// triangle data
 	float vertices[] = {
 		-0.5f, -0.5f, 0.0f,
 		0.5f, -0.5f, 0.0f,
-		0.0f,  0.5f, 0.0f
+		0.0f, 0.5f, 0.0f 
 	};
 	// create mesh from vertices
 	struct mesh_t triangle = {
@@ -186,6 +215,7 @@ main(int argc,
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glUseProgram(shader_program);
 		render_mesh(triangle);
+		console_write_buffer(&screen);
 		SDL_GL_SwapWindow(win);
 	}
 
