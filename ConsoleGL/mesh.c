@@ -5,42 +5,46 @@
 
 extern const char *VERTEX_SOURCE = "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
+"out vec3 vertexColor;\n"
 "void main()\n"
 "{\n"
-"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+"   gl_Position = vec4(aPos, 1.0);\n"
+"	vertexColor = aPos * 0.5 + 0.5;\n"
 "}\0";
 
 extern const char *FRAGMENT_SOURCE = "#version 330 core\n"
+"in vec3 vertexColor;\n"
 "out vec4 FragColor;\n"
 "void main()\n"
 "{\n"
-"   FragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
+"   FragColor = vec4(vertexColor, 1.0f);\n"
 "}\0";
 
 void
 init_mesh_buffers(struct mesh_t *mesh)
 {
-	// create vbo
+	// create vao and vbo
+	glGenVertexArrays(1, &mesh->vao);
 	glGenBuffers(1, &mesh->vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
-	glBufferData(GL_ARRAY_BUFFER, mesh->size, mesh->vertices, GL_STATIC_DRAW);
-	// create vao
-	glGenVertexArrays(1, &mesh->vao); 
+	// bind vao
 	glBindVertexArray(mesh->vao);
-	glBindBuffer(GL_ARRAY_BUFFER, mesh->vao);
-	glBufferData(GL_ARRAY_BUFFER, mesh->size, mesh->vertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	// tell gpu how to interpret vertex data
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	// copy vertices array into buffer for OpenGL to use
+
 	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
-	glBufferData(GL_ARRAY_BUFFER, mesh->size, mesh->vertices, GL_STATIC_DRAW);
-	// set the vertex attributes pointers
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glBufferData(GL_ARRAY_BUFFER,
+		mesh->size,
+		mesh->vertices,
+		GL_STATIC_DRAW);
+
+	glVertexAttribPointer(
+		0,
+		3,
+		GL_FLOAT,
+		GL_FALSE,
+		3 * sizeof(float),
+		(void *)0);
 	glEnableVertexAttribArray(0);
-	mesh->count = mesh->size / sizeof(float) / 3;
+
+	mesh->count = mesh->size / (3 * sizeof(float));
 }
 
 void
