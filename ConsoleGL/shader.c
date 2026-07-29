@@ -101,19 +101,3 @@ shaderprog_compile(shaderprog_t *shader,
 	free(fragment_source);
 	return TRUE;
 }
-
-void
-shader_seti(shaderprog_t shader, 
-	const char *name, 
-	GLint value)
-{
-	glUniform1i(glGetUniformLocation(shader, name), value);
-}
-
-void
-shader_setf(shaderprog_t shader, 
-	const char *name, 
-	GLfloat value)
-{
-	glUniform1f(glGetUniformLocation(shader, name), value);
-}
