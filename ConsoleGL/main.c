@@ -5,10 +5,11 @@
 #include "expect.h"
 #include "mesh.h"
 #include "conscr.h"
+#include "shader.h"
 
 BOOL
 init_window_and_context(SDL_Window **win,
-						SDL_GLContext *context) 
+	SDL_GLContext *context) 
 {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
@@ -22,8 +23,12 @@ init_window_and_context(SDL_Window **win,
 		return FALSE;
 	}
 
-	// window width and height are scaled up because S_WIDTH and S_HEIGHT are the screen width/height in characters, not pixels
-	if (!(*win = SDL_CreateWindow("OpenGL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, S_WIDTH, S_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN))) {
+	// window width and height are scaled up because S_WIDTH and S_HEIGHT 
+	// are the screen width/height in characters, not pixels
+	if (!(*win = SDL_CreateWindow("OpenGL", 
+		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
+		S_WIDTH, S_HEIGHT, 
+		SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN))) {
 		fprintf(stderr, "Failed to create window: %s\n", SDL_GetError());
 		SDL_Quit();
 		return 0;
@@ -49,7 +54,7 @@ init_window_and_context(SDL_Window **win,
 
 void
 destroy_window_and_context(SDL_Window **win,
-						   SDL_GLContext *context)
+	SDL_GLContext *context)
 {
 	SDL_GL_DeleteContext(*context);
 	SDL_DestroyWindow(*win);
@@ -64,10 +69,12 @@ main(int argc,
 	SDL_Window *win;
 	SDL_GLContext context;
 	SDL_Event event;
+
 	// main loop
 	BOOL running = TRUE;
+
 	// opengl data
-	GLuint shader_program;
+	shaderprog_t shader_program;
 	// triangle data
 	float vertices[] = {
 		-0.5f, -0.5f, 0.0f,
@@ -81,13 +88,10 @@ main(int argc,
 	};
 	struct conscr_t screen;
 	
-	// init window and context
 	EXPECT(init_window_and_context(&win, &context));
-	EXPECT(compile_shaders(&shader_program));
-	init_mesh_buffers(&triangle);
-
-	// init console screen buffer
+	EXPECT(shaderprog_compile(&shader_program, "vert.glsl", "frag.glsl"));
 	EXPECT(conscr_init(&screen));
+	init_mesh_buffers(&triangle);
 
 	while (running) {
 		while (SDL_PollEvent(&event)) {
@@ -103,6 +107,8 @@ main(int argc,
 		SDL_GL_SwapWindow(win);
 	}
 
+	// clean up
+	glDeleteProgram(shader_program);
 	destroy_window_and_context(&win, &context);
 	conscr_destroy(&screen);
 	return 0;
