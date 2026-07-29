@@ -33,7 +33,7 @@ init_mesh_buffers(struct mesh_t *mesh)
 }
 
 void
-render_mesh(struct mesh_t mesh)
+draw_mesh(struct mesh_t mesh)
 {
 	glBindVertexArray(mesh.vao);
 	glDrawArrays(GL_TRIANGLES, 0, mesh.count);

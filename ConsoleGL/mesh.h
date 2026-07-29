@@ -13,6 +13,6 @@ void
 init_mesh_buffers(struct mesh_t *mesh);
 
 void
-render_mesh(struct mesh_t mesh);
+draw_mesh(struct mesh_t mesh);
 
 #endif // !__MESH_H__
