@@ -24,10 +24,23 @@
     <ClCompile Include="mesh.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="conscr.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="conscr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="expect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="vert.glsl" />
+    <None Include="frag.glsl" />
   </ItemGroup>
 </Project>

@@ -134,11 +134,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\libs\glad-3.3\src\glad.c" />
+    <ClCompile Include="conscr.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="mesh.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="conscr.h" />
+    <ClInclude Include="expect.h" />
     <ClInclude Include="mesh.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="frag.glsl" />
+    <None Include="vert.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
