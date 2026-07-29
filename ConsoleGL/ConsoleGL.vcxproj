@@ -137,11 +137,13 @@
     <ClCompile Include="conscr.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="mesh.c" />
+    <ClCompile Include="shader.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="conscr.h" />
     <ClInclude Include="expect.h" />
     <ClInclude Include="mesh.h" />
+    <ClInclude Include="shader.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="frag.glsl" />

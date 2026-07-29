@@ -15,11 +15,4 @@ init_mesh_buffers(struct mesh_t *mesh);
 void
 render_mesh(struct mesh_t mesh);
 
-// returns null terminated, heap allocated string that must be freed by the user
-char *
-read_shader(const char *path);
-
-BOOL
-compile_shaders(GLuint *shader_program);
-
 #endif // !__MESH_H__
