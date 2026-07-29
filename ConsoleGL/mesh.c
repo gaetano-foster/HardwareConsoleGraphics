@@ -39,7 +39,6 @@ render_mesh(struct mesh_t mesh)
 	glDrawArrays(GL_TRIANGLES, 0, mesh.count);
 }
 
-// returns null terminated, heap allocated string that must be freed by the user
 char *
 read_shader(const char *path)
 {
