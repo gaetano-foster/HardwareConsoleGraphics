@@ -3,6 +3,7 @@
 
 #define S_WIDTH			(120)
 #define S_HEIGHT		(40)
+#define FONT_SIZE		(16)		
 #define CELL_MAX_BYTES	(32)
 
 // defining one pixel as b, g, r and no alpha

@@ -4,6 +4,23 @@
 #include <Windows.h>
 #include "conscr.h"
 
+static void
+resize_console(HANDLE console_handle)
+{
+	// change font size
+	CONSOLE_FONT_INFOEX cfi;
+	cfi.cbSize = sizeof(CONSOLE_FONT_INFOEX);
+	GetCurrentConsoleFontEx(console_handle, FALSE, &cfi);
+	cfi.dwFontSize.X = 0; // system auto calculates width
+	cfi.dwFontSize.Y = FONT_SIZE; // new font height in pixels
+	wcscpy_s(cfi.FaceName, LF_FACESIZE, L"Consolas");
+	SetCurrentConsoleFontEx(console_handle, FALSE, &cfi);
+
+	// set screen buffer size & physical window rect size
+	SetConsoleScreenBufferSize(console_handle, (COORD) { S_WIDTH, S_HEIGHT });
+	SetConsoleWindowInfo(console_handle, TRUE, &(SMALL_RECT) { 0, 0, S_WIDTH - 1, S_HEIGHT - 1 });
+}
+
 BOOL
 conscr_init(struct conscr_t *screen)
 {
@@ -38,6 +55,7 @@ conscr_init(struct conscr_t *screen)
 	}
 
 	SetConsoleActiveScreenBuffer(screen->console_handle);
+	resize_console(screen->console_handle);
 	return TRUE;
 }
 
