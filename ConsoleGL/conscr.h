@@ -13,25 +13,14 @@ typedef struct bgr_t {
 	BYTE r;
 };
 
-struct conscr_t {
-	// buffers
-	BYTE *pixel_buffer;
-	char *frame_buffer;
-	// handles
-	HANDLE console_handle;
-	HANDLE original;
-	// junk data
-	DWORD bytes_written;
-};
-
 BOOL
-conscr_init(struct conscr_t *screen);
+conscr_init();
 
 void
-conscr_render(struct conscr_t *screen);
+conscr_render();
 
 void
-conscr_destroy(struct conscr_t *screen);
+conscr_destroy();
 
 // saving because it might be useful later, but now unused
 CHAR_INFO 

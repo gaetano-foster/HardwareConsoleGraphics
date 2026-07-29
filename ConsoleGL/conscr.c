@@ -4,6 +4,17 @@
 #include <Windows.h>
 #include "conscr.h"
 
+static struct _conscr_t {
+	// buffers
+	BYTE *pixel_buffer;
+	char *frame_buffer;
+	// handles
+	HANDLE console_handle;
+	HANDLE original;
+	// junk data
+	DWORD bytes_written;
+} conscr_screen;
+
 static void
 resize_console(HANDLE console_handle)
 {
@@ -23,45 +34,45 @@ resize_console(HANDLE console_handle)
 }
 
 BOOL
-conscr_init(struct conscr_t *screen)
+conscr_init()
 {
 	// store original screen
-	screen->original = GetStdHandle(STD_OUTPUT_HANDLE);
+	conscr_screen.original = GetStdHandle(STD_OUTPUT_HANDLE);
 
 	// allocate pixel buffer
-	if (!(screen->pixel_buffer = malloc(3 * S_WIDTH * S_HEIGHT))) {
+	if (!(conscr_screen.pixel_buffer = malloc(3 * S_WIDTH * S_HEIGHT))) {
 		fprintf(stderr, "Failed to allocate memory for pixel buffer.\n");
 		return FALSE;
 	}
 
 	// allocate frame buffer
-	if (!(screen->frame_buffer = malloc(CELL_MAX_BYTES * S_WIDTH * S_HEIGHT))) {
+	if (!(conscr_screen.frame_buffer = malloc(CELL_MAX_BYTES * S_WIDTH * S_HEIGHT))) {
 		fprintf(stderr, "Failed to allocate memory for frame buffer.\n");
-		free(screen->pixel_buffer);
+		free(conscr_screen.pixel_buffer);
 		return FALSE;
 	}
 
 	// create and focus console screen buffer
-	screen->console_handle = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
-	if (screen->console_handle == INVALID_HANDLE_VALUE) {
+	conscr_screen.console_handle = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+	if (conscr_screen.console_handle == INVALID_HANDLE_VALUE) {
 		fprintf(stderr, "Failed to create console screen handle.\n");
-		free(screen->pixel_buffer);
+		free(conscr_screen.pixel_buffer);
 		return FALSE;
 	}
 
 	DWORD mode = 0;
-	if (GetConsoleMode(screen->console_handle, &mode)) {
+	if (GetConsoleMode(conscr_screen.console_handle, &mode)) {
 		SetConsoleOutputCP(CP_UTF8);
-		SetConsoleMode(screen->console_handle, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+		SetConsoleMode(conscr_screen.console_handle, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
 	}
 
-	SetConsoleActiveScreenBuffer(screen->console_handle);
-	resize_console(screen->console_handle);
+	SetConsoleActiveScreenBuffer(conscr_screen.console_handle);
+	resize_console(conscr_screen.console_handle);
 	return TRUE;
 }
 
 void
-conscr_render(struct conscr_t *screen)
+conscr_render()
 {
 	// write frame buffer data to screen buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -74,10 +85,10 @@ conscr_render(struct conscr_t *screen)
 		S_WIDTH, S_HEIGHT, 
 		GL_BGR, 
 		GL_UNSIGNED_BYTE, 
-		screen->pixel_buffer);
+		conscr_screen.pixel_buffer);
 
-	struct bgr_t *buf = (struct bgr_t *)(screen->pixel_buffer);
-	char *fb = screen->frame_buffer;
+	struct bgr_t *buf = (struct bgr_t *)(conscr_screen.pixel_buffer);
+	char *fb = conscr_screen.frame_buffer;
 	// move cursor to 0, 0
 	fb += sprintf(fb, "\x1b[H");
 
@@ -92,24 +103,24 @@ conscr_render(struct conscr_t *screen)
 		}
 	}
 
-	DWORD chars_to_write = fb - screen->frame_buffer; // difference between fb pointer and starting frame buffer pointer = number of characters to write
+	DWORD chars_to_write = fb - conscr_screen.frame_buffer; // difference between fb pointer and starting frame buffer pointer = number of characters to write
 	WriteConsoleA(
-		screen->console_handle,
-		screen->frame_buffer,
+		conscr_screen.console_handle,
+		conscr_screen.frame_buffer,
 		chars_to_write,
-		&screen->bytes_written,
+		&conscr_screen.bytes_written,
 		NULL);
 
 	glPixelStorei(GL_PACK_ALIGNMENT, 4);
 }
 
 void
-conscr_destroy(struct conscr_t *screen)
+conscr_destroy()
 {
-	SetConsoleActiveScreenBuffer(screen->original);
-	CloseHandle(screen->console_handle);
-	free(screen->pixel_buffer);
-	free(screen->frame_buffer);
+	SetConsoleActiveScreenBuffer(conscr_screen.original);
+	CloseHandle(conscr_screen.console_handle);
+	free(conscr_screen.pixel_buffer);
+	free(conscr_screen.frame_buffer);
 }
 
 CHAR_INFO 
@@ -140,6 +151,6 @@ bgr_to_ascii(struct bgr_t bgr)
 
 	return (CHAR_INFO) {
 		.Char.UnicodeChar = palette[index],
-			.Attributes = attr
+		.Attributes = attr
 	};
 }
