@@ -1,4 +1,4 @@
-#include <stdio.h>
+﻿#include <stdio.h>
 #include <glad/glad.h>
 #include <SDL.h>
 #include <Windows.h>
@@ -39,20 +39,30 @@ bgr_to_ascii(struct bgr_t bgr)
 {
 	const int MAX_VALUE = 765; // 255 + 255 + 255
 	// darkest to lightest characters
-	// TODO: adjust characters for luminance for more accurate lighting
-	const WCHAR *palette = L" `.-':_,^=;>+!rc/z?sLTv)J7(|F{CfI31tlu[neoZ5Yxjya2ESwkP6h9d4VpOGbUAXHm8RD#$Bg0MNWQ%&@@";
-	int value = bgr.b + bgr.g + bgr.r;
-	double percent = (double)value / (double)MAX_VALUE;
+	static const WCHAR *palette = L" ▏▎▍▌▋▊▉█";
+	const size_t palette_length = wcslen(palette);
+	double value = bgr.b + bgr.g + bgr.r;
+	int index = (value / MAX_VALUE) * palette_length;
 
-	// normalize color values from pixel
-	BYTE b = bgr.b, g = bgr.g, r = bgr.r;
-	b = b < 127 ? 0 : FOREGROUND_BLUE;
-	g = g < 127 ? 0 : FOREGROUND_GREEN;
-	r = r < 127 ? 0 : FOREGROUND_RED;
+	// threshold colors into attribute colors
+	WORD attr = 0;
+
+	if (bgr.b > 100)
+		attr |= FOREGROUND_BLUE;
+
+	if (bgr.g > 150)
+		attr |= FOREGROUND_GREEN;
+
+	if (bgr.r > 120)
+		attr |= FOREGROUND_RED;
+
+	if ((bgr.b + bgr.g + bgr.r) / 3 > 127) {
+		attr |= FOREGROUND_INTENSITY;
+	}
 
 	return (CHAR_INFO) {
-		.Char.UnicodeChar = palette[(int)(percent * 85)],
-		.Attributes = r | g | b
+		.Char.UnicodeChar = palette[index],
+		.Attributes = attr
 	};
 }
 
