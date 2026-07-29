@@ -38,3 +38,10 @@ mesh_draw(mesh_t mesh)
 	glBindVertexArray(mesh.vao);
 	glDrawArrays(GL_TRIANGLES, 0, mesh.count);
 }
+
+void 
+mesh_destroy(mesh_t mesh)
+{
+	glDeleteVertexArrays(1, &mesh.vao);
+	glDeleteBuffers(1, &mesh.vbo);
+}

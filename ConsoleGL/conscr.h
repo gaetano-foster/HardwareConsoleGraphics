@@ -6,23 +6,40 @@
 #define FONT_SIZE		(16)		
 #define CELL_MAX_BYTES	(32)
 
-// defining one pixel as b, g, r and no alpha
-typedef struct bgr_t {
+/*
+Represents one 24-bit-pixel in BGR format. 3 BYTEs
+*/
+struct bgr_t {
 	BYTE b;
 	BYTE g;
 	BYTE r;
 };
 
+/*
+Initializes Console Screen and allocates memory
+
+Return Values:
+	- FALSE (0): Indicates failure
+	- TRUE	(1): Indicates success
+*/
 BOOL
 conscr_init();
 
+/*
+Encodes OpenGL frame buffer 0 to Console Screen frame buffer 
+and writes Console Screen frame buffer to the console
+*/
 void
 conscr_render();
 
+/* 
+Frees memory used by the Console Screen and returns
+the console's screen buffer to its original state
+*/
 void
 conscr_destroy();
 
-// saving because it might be useful later, but now unused
+// CURRENTLY UNUSED
 CHAR_INFO 
 bgr_to_ascii(struct bgr_t bgr);
 
