@@ -1,12 +1,14 @@
-﻿#include <stdio.h>
+﻿#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
 #include <glad/glad.h>
 #include <SDL.h>
 #include <Windows.h>
 #include <assert.h>
 #include "mesh.h"
 
-#define S_WIDTH		(120)
-#define S_HEIGHT	(40)
+#define S_WIDTH			(120)
+#define S_HEIGHT		(40)
+#define CELL_MAX_BYTES	(32)
 
 #define EXPECT(B)								\
     do {										\
@@ -19,7 +21,7 @@
     } while (0)
 
 // defining one pixel as b, g, r and no alpha
-struct bgr_t {
+typedef struct bgr_t {
 	BYTE b;
 	BYTE g;
 	BYTE r;
@@ -27,13 +29,16 @@ struct bgr_t {
 
 struct console_screen_t {
 	// buffers
-	CHAR_INFO *front_buffer;
-	BYTE	  *back_buffer;
+	BYTE *pixel_buffer;
+	char *frame_buffer;
 	// handles
 	HANDLE console_handle;
 	HANDLE original;
+	// junk data
+	DWORD bytes_written;
 };
 
+// saving because it might be useful later, but now unused
 CHAR_INFO 
 bgr_to_ascii(struct bgr_t bgr) 
 {
@@ -122,14 +127,16 @@ init_console_screen(struct console_screen_t *screen)
 	// store original screen
 	screen->original = GetStdHandle(STD_OUTPUT_HANDLE);
 
-	// allocate front and back buffers
-	if (!(screen->front_buffer = malloc(sizeof(CHAR_INFO) * S_WIDTH * S_HEIGHT))) {
-		fprintf(stderr, "Failed to allocate memory for front buffer.\n");
+	// allocate pixel buffer
+	if (!(screen->pixel_buffer = malloc(3 * S_WIDTH * S_HEIGHT))) {
+		fprintf(stderr, "Failed to allocate memory for pixel buffer.\n");
 		return FALSE;
 	}
-	if (!(screen->back_buffer = malloc(3 * S_WIDTH * S_HEIGHT))) {
-		fprintf(stderr, "Failed to allocate memory for back buffer.\n");
-		free(screen->front_buffer);
+
+	// allocate frame buffer
+	if (!(screen->frame_buffer = malloc(CELL_MAX_BYTES * S_WIDTH * S_HEIGHT))) {
+		fprintf(stderr, "Failed to allocate memory for frame buffer.\n");
+		free(screen->pixel_buffer);
 		return FALSE;
 	}
 
@@ -137,10 +144,16 @@ init_console_screen(struct console_screen_t *screen)
 	screen->console_handle = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
 	if (screen->console_handle == INVALID_HANDLE_VALUE) {
 		fprintf(stderr, "Failed to create console screen handle.\n");
-		free(screen->front_buffer);
-		free(screen->back_buffer);
+		free(screen->pixel_buffer);
 		return FALSE;
 	}
+
+	DWORD mode = 0;
+	if (GetConsoleMode(screen->console_handle, &mode)) {
+		SetConsoleOutputCP(CP_UTF8);
+		SetConsoleMode(screen->console_handle, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+	}
+
 	SetConsoleActiveScreenBuffer(screen->console_handle);
 	return TRUE;
 }
@@ -152,24 +165,40 @@ console_write_buffer(struct console_screen_t *screen)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glReadBuffer(GL_FRONT);
-	glReadPixels(0, 0, S_WIDTH, S_HEIGHT, GL_BGR, GL_UNSIGNED_BYTE, screen->back_buffer);
-	struct bgr_t *buf = (struct bgr_t *)(screen->back_buffer);
-	// TODO: find better way of doing this
+
+	// read raw color data into pixel buffer
+	glReadPixels(
+		0, 0, 
+		S_WIDTH, S_HEIGHT, 
+		GL_BGR, 
+		GL_UNSIGNED_BYTE, 
+		screen->pixel_buffer);
+
+	struct bgr_t *buf = (struct bgr_t *)(screen->pixel_buffer);
+	char *fb = screen->frame_buffer;
+	// move cursor to 0, 0
+	fb += sprintf(fb, "\x1b[H");
+
+	// encode color + character data into framebuffer =
 	for (int y = 0; y < S_HEIGHT; y++) {
 		for (int x = 0; x < S_WIDTH; x++) {
-			screen->front_buffer[y * S_WIDTH + x] = bgr_to_ascii(buf[((S_HEIGHT - 1 - y) * S_WIDTH + x)]);
+			struct bgr_t color = buf[(S_HEIGHT - 1 - y) * S_WIDTH + x];
+			fb += sprintf(
+				fb,
+				"\x1b[38;2;%d;%d;%dm█",
+				color.r, color.g, color.b);
 		}
 	}
+
+	DWORD chars_to_write = fb - screen->frame_buffer; // difference between fb pointer and starting frame buffer pointer = number of characters to write
+	WriteConsoleA(
+		screen->console_handle,
+		screen->frame_buffer,
+		chars_to_write,
+		&screen->bytes_written,
+		NULL);
+
 	glPixelStorei(GL_PACK_ALIGNMENT, 4);
-	// write screen buffer data to console
-	SMALL_RECT write_region = { 0, 0, S_WIDTH - 1, S_HEIGHT - 1 };
-	WriteConsoleOutputW(
-		screen->console_handle, 
-		screen->front_buffer, 
-		(COORD) { S_WIDTH, S_HEIGHT }, 
-		(COORD) { 0, 0 }, 
-		&write_region
-	);
 }
 
 void
@@ -177,8 +206,8 @@ destroy_console_screen(struct console_screen_t *screen)
 {
 	SetConsoleActiveScreenBuffer(screen->original);
 	CloseHandle(screen->console_handle);
-	free(screen->front_buffer);
-	free(screen->back_buffer);
+	free(screen->pixel_buffer);
+	free(screen->frame_buffer);
 }
 
 int
