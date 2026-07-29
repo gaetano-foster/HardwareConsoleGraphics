@@ -1,9 +1,6 @@
 #ifndef __MESH_H__
 #define __MESH_H__
 
-extern const char *VERTEX_SOURCE;
-extern const char *FRAGMENT_SOURCE;
-
 struct mesh_t {
 	GLuint vao;
 	GLuint vbo;
