@@ -9,7 +9,7 @@ extern const char *VERTEX_SOURCE = "#version 330 core\n"
 "void main()\n"
 "{\n"
 "   gl_Position = vec4(aPos, 1.0);\n"
-"	vertexColor = aPos * 0.5 + 0.5;\n"
+"	vertexColor = aPos + 0.5;\n"
 "}\0";
 
 extern const char *FRAGMENT_SOURCE = "#version 330 core\n"
