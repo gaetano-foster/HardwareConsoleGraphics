@@ -6,7 +6,7 @@
 #include "expect.h"
 
 void
-init_mesh_buffers(struct mesh_t *mesh)
+mesh_init_buffers(struct mesh_t *mesh)
 {
 	// create vao and vbo
 	glGenVertexArrays(1, &mesh->vao);
@@ -33,7 +33,7 @@ init_mesh_buffers(struct mesh_t *mesh)
 }
 
 void
-draw_mesh(struct mesh_t mesh)
+mesh_draw(struct mesh_t mesh)
 {
 	glBindVertexArray(mesh.vao);
 	glDrawArrays(GL_TRIANGLES, 0, mesh.count);
