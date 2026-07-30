@@ -9,6 +9,7 @@
 #include "context.h"
 #include "shader.h"
 #include "object.h"
+#include "camera.h"
 
 int
 main(int argc,
@@ -40,8 +41,22 @@ main(int argc,
 		.mesh = &mesh,
 		.shader = &shader_program
 	};
-
 	object_init(&triangle);
+	object_setpos(&triangle, (vec3) { 0.0f, 0.0f, -1.0f });
+
+	struct camera_config_t config = {
+		.x = -2,
+		.y = 0,
+		.z = 0,
+		.pitch = 0,
+		.yaw = 0,
+		.roll = 0,
+		.fov = 90,
+		.aspect = (float)S_WIDTH / (float)S_HEIGHT
+	};
+	camera_init(config);
+
+	shader_use(&shader_program);
 
 	while (running) {
 		while (SDL_PollEvent(&event)) {
@@ -51,7 +66,7 @@ main(int argc,
 		}
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		object_rotate(&triangle, 0.1f, (vec3) { 0.0f, 0.0f, 1.0f });
+		object_rotate(&triangle, 0.1f, (vec3) { 0.0f, 1.0f, 0.0f });
 		object_draw(&triangle);
 		conscr_render();
 		context_swap();
