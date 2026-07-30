@@ -5,7 +5,7 @@
 #include "shader.h"
 #include "expect.h"
 
-// returns null terminated, heap allocated string that must be freed by the user
+// Returns null terminated, heap allocated string that must be freed by the caller
 static char *
 read_shader(const char *path)
 {
@@ -54,7 +54,7 @@ read_shader(const char *path)
 }
 
 BOOL
-shaderprog_compile(shaderprog_t *shader,
+shader_compile(shader_t *shader,
 	const char *vert_path,
 	const char *frag_path)
 {
@@ -90,14 +90,30 @@ shaderprog_compile(shaderprog_t *shader,
 		return FALSE;
 	}
 	// link shader program
-	*shader = glCreateProgram();
-	glAttachShader(*shader, vertex_shader);
-	glAttachShader(*shader, fragment_shader);
-	glLinkProgram(*shader);
+	shader->id = glCreateProgram();
+	glAttachShader(shader->id, vertex_shader);
+	glAttachShader(shader->id, fragment_shader);
+	glLinkProgram(shader->id);
+	// populate uniform values
+	EXPECT((shader->model_loc = glGetUniformLocation(shader->id, "model")) != -1);
+	//EXPECT((shader->proj_loc = glGetUniformLocation(shader->id, "proj")) != -1);
+	//EXPECT((shader->view_loc = glGetUniformLocation(shader->id, "view")) != -1);
 	// clean up
 	glDeleteShader(vertex_shader);
 	glDeleteShader(fragment_shader); 
 	free(vertex_source);
 	free(fragment_source);
 	return TRUE;
+}
+
+void
+shader_destroy(shader_t *shader)
+{
+	glDeleteProgram(shader->id);
+}
+
+void
+shader_use(shader_t *shader)
+{
+	glUseProgram(shader->id);
 }
