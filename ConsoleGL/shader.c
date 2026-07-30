@@ -1,9 +1,11 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <glad/glad.h>
+#include <cglm/cglm.h>
 #include <stdio.h>
 #include <Windows.h>
 #include "shader.h"
 #include "expect.h"
+#include "camera.h"
 
 // Returns null terminated, heap allocated string that must be freed by the caller
 static char *
@@ -96,8 +98,8 @@ shader_compile(shader_t *shader,
 	glLinkProgram(shader->id);
 	// populate uniform values
 	EXPECT((shader->model_loc = glGetUniformLocation(shader->id, "model")) != -1);
-	//EXPECT((shader->proj_loc = glGetUniformLocation(shader->id, "proj")) != -1);
-	//EXPECT((shader->view_loc = glGetUniformLocation(shader->id, "view")) != -1);
+	EXPECT((shader->proj_loc = glGetUniformLocation(shader->id, "proj")) != -1);
+	EXPECT((shader->view_loc = glGetUniformLocation(shader->id, "view")) != -1);
 	// clean up
 	glDeleteShader(vertex_shader);
 	glDeleteShader(fragment_shader); 
