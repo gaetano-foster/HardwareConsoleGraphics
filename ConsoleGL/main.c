@@ -2,79 +2,27 @@
 #include <glad/glad.h>
 #include <SDL.h>
 #include <Windows.h>
+#include <cglm/cglm.h>
 #include "expect.h"
 #include "mesh.h"
 #include "conscr.h"
+#include "context.h"
 #include "shader.h"
-
-BOOL
-init_window_and_context(SDL_Window **win,
-	SDL_GLContext *context) 
-{
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-		fprintf(stderr, "Failed to init video: %s\n", SDL_GetError());
-		SDL_Quit();
-		return FALSE;
-	}
-
-	// window width and height are scaled up because S_WIDTH and S_HEIGHT 
-	// are the screen width/height in characters, not pixels
-	if (!(*win = SDL_CreateWindow("OpenGL", 
-		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
-		S_WIDTH, S_HEIGHT, 
-		SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN))) {
-		fprintf(stderr, "Failed to create window: %s\n", SDL_GetError());
-		SDL_Quit();
-		return 0;
-	}
-
-	if (!(*context = SDL_GL_CreateContext(*win))) {
-		fprintf(stderr, "Failed to create context: %s\n", SDL_GetError());
-		SDL_DestroyWindow(*win);
-		SDL_Quit();
-		return FALSE;
-	}
-
-	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
-		fprintf(stderr, "Failed to initialize GLAD");
-		SDL_GL_DeleteContext(*context);
-		SDL_DestroyWindow(*win);
-		SDL_Quit();
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
-void
-destroy_window_and_context(SDL_Window **win,
-	SDL_GLContext *context)
-{
-	SDL_GL_DeleteContext(*context);
-	SDL_DestroyWindow(*win);
-	SDL_Quit();
-}
+#include "object.h"
 
 int
 main(int argc,
 	 char **argv)
 {
-	// sdl window constructs
-	SDL_Window *win;
-	SDL_GLContext context;
-	SDL_Event event;
-
 	// main loop
+	SDL_Event event;
 	BOOL running = TRUE;
 
-	// opengl data
-	shaderprog_t shader_program;
+	EXPECT(context_init(S_WIDTH, S_HEIGHT));
+	EXPECT(conscr_init());
+
+	shader_t shader_program;
+	EXPECT(shader_compile(&shader_program, "vert.glsl", "frag.glsl"));
 	// triangle data
 	float vertices[] = {
 		-0.5f, -0.5f, 0.0f,
@@ -82,16 +30,18 @@ main(int argc,
 		0.0f, 0.5f, 0.0f 
 	};
 	// create mesh from vertices
-	struct mesh_t triangle = {
+	mesh_t mesh = {
 		.vertices = vertices,
 		.size = sizeof(vertices)
 	};
-	struct conscr_t screen;
-	
-	EXPECT(init_window_and_context(&win, &context));
-	EXPECT(shaderprog_compile(&shader_program, "vert.glsl", "frag.glsl"));
-	EXPECT(conscr_init(&screen));
-	init_mesh_buffers(&triangle);
+	mesh_init_buffers(&mesh);
+
+	object_t triangle = {
+		.mesh = &mesh,
+		.shader = &shader_program
+	};
+
+	object_init(&triangle);
 
 	while (running) {
 		while (SDL_PollEvent(&event)) {
@@ -101,15 +51,16 @@ main(int argc,
 		}
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glUseProgram(shader_program);
-		draw_mesh(triangle);
-		conscr_render(&screen);
-		SDL_GL_SwapWindow(win);
+		object_rotate(&triangle, 0.1f, (vec3) { 0.0f, 0.0f, 1.0f });
+		object_draw(&triangle);
+		conscr_render();
+		context_swap();
 	}
 
 	// clean up
-	glDeleteProgram(shader_program);
-	destroy_window_and_context(&win, &context);
-	conscr_destroy(&screen);
+	mesh_destroy(&mesh);
+	shader_destroy(&shader_program);
+	context_destroy();
+	conscr_destroy();
 	return 0;
 }
