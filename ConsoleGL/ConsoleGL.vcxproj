@@ -135,14 +135,18 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\libs\glad-3.3\src\glad.c" />
     <ClCompile Include="conscr.c" />
+    <ClCompile Include="context.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="mesh.c" />
+    <ClCompile Include="object.c" />
     <ClCompile Include="shader.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="conscr.h" />
+    <ClInclude Include="context.h" />
     <ClInclude Include="expect.h" />
     <ClInclude Include="mesh.h" />
+    <ClInclude Include="object.h" />
     <ClInclude Include="shader.h" />
   </ItemGroup>
   <ItemGroup>
