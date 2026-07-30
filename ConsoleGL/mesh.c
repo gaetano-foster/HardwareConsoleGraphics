@@ -33,15 +33,15 @@ mesh_init_buffers(mesh_t *mesh)
 }
 
 void
-mesh_draw(mesh_t mesh)
+mesh_draw(mesh_t *mesh)
 {
-	glBindVertexArray(mesh.vao);
-	glDrawArrays(GL_TRIANGLES, 0, mesh.count);
+	glBindVertexArray(mesh->vao);
+	glDrawArrays(GL_TRIANGLES, 0, mesh->count);
 }
 
 void 
-mesh_destroy(mesh_t mesh)
+mesh_destroy(mesh_t *mesh)
 {
-	glDeleteVertexArrays(1, &mesh.vao);
-	glDeleteBuffers(1, &mesh.vbo);
+	glDeleteVertexArrays(1, &mesh->vao);
+	glDeleteBuffers(1, &mesh->vbo);
 }

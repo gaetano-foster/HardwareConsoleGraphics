@@ -27,7 +27,7 @@ typedef struct _mesh_t {
 Initializes the VAO, VBO, and count of the given mesh.
 
 Parameters:
-	- mesh_t *mesh: pointer to previously allocated mesh with user 
+	- mesh_t *mesh: pointer to previously allocated mesh with caller 
 	  defined vertices and size
 
 TODO:
@@ -40,12 +40,12 @@ mesh_init_buffers(mesh_t *mesh);
 Frees memory associated with mesh
 */
 void
-mesh_destroy(mesh_t mesh);
+mesh_destroy(mesh_t *mesh);
 
 /*
 Draws the mesh to the OpenGL frame buffer
 */
 void
-mesh_draw(mesh_t mesh);
+mesh_draw(mesh_t *mesh);
 
 #endif // !__MESH_H__
