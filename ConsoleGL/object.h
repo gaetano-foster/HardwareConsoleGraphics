@@ -25,14 +25,14 @@ void
 object_init(object_t *object);
 
 /*
-Uses object->shader and draws object-> mesh to OpenGL frame buffer
+Uses object->shader and draws object->mesh to OpenGL frame buffer
 */
 void
 object_draw(object_t *object);
 
 
 ////
-/// TRANSFORMATION FUNCTIONS
+/// TRANSFORM FUNCTIONS
 //
 
 /*
@@ -74,7 +74,7 @@ object_rotatel(object_t *object,
 	float angle, vec3 axis);
 
 /*
-Default translation function
+Default translation function (world space)
 Equivalent to object_translatew
 */
 void 
@@ -100,5 +100,12 @@ Scales object uniformly in local space
 void
 object_scale(object_t *object,
 	float scale);
+
+/*
+Sets absolute position to specified position
+*/
+void 
+object_setpos(object_t *object, 
+	vec3 pos);
 
 #endif
