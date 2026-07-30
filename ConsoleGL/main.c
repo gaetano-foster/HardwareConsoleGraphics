@@ -19,6 +19,23 @@ struct {
 } keys;
 
 void
+capture_input()
+{
+	// use GetAsyncKeyState for input instead of built in SDL inputs
+	// so it still works when the window closes
+	keys.W = GetAsyncKeyState('W') & 0x8000;
+	keys.A = GetAsyncKeyState('A') & 0x8000;
+	keys.S = GetAsyncKeyState('S') & 0x8000;
+	keys.D = GetAsyncKeyState('D') & 0x8000;
+	keys.SPACE = GetAsyncKeyState(' ') & 0x8000;
+	keys.LSHIFT = GetAsyncKeyState(VK_SPACE) & 0x8000;
+	keys.UP = GetAsyncKeyState(VK_UP) & 0x8000;
+	keys.LEFT = GetAsyncKeyState(VK_LEFT) & 0x8000;
+	keys.DOWN = GetAsyncKeyState(VK_DOWN) & 0x8000;
+	keys.RIGHT = GetAsyncKeyState(VK_RIGHT) & 0x8000;
+}
+
+void
 move_camera()
 {
 	if (keys.W)
@@ -96,76 +113,9 @@ main(int argc,
 			case SDL_QUIT: 
 				running = FALSE;
 				break;
-			case SDL_KEYDOWN:
-				switch (event.key.keysym.scancode) {
-				case SDL_SCANCODE_W:
-					keys.W = TRUE;
-					break;
-				case SDL_SCANCODE_S:
-					keys.S = TRUE;
-					break;
-				case SDL_SCANCODE_A:
-					keys.A = TRUE;
-					break;
-				case SDL_SCANCODE_D:
-					keys.D = TRUE;
-					break;
-				case SDL_SCANCODE_SPACE:
-					keys.SPACE = TRUE;
-					break;
-				case SDL_SCANCODE_LSHIFT:
-					keys.LSHIFT = TRUE;
-					break;
-				case SDL_SCANCODE_UP:
-					keys.UP = TRUE;
-					break;
-				case SDL_SCANCODE_DOWN:
-					keys.DOWN = TRUE;
-					break;
-				case SDL_SCANCODE_LEFT:
-					keys.LEFT = TRUE;
-					break;
-				case SDL_SCANCODE_RIGHT:
-					keys.RIGHT = TRUE;
-					break;
-				}
-				break;
-			case SDL_KEYUP:
-				switch (event.key.keysym.scancode) {
-				case SDL_SCANCODE_W:
-					keys.W = FALSE;
-					break;
-				case SDL_SCANCODE_S:
-					keys.S = FALSE;
-					break;
-				case SDL_SCANCODE_A:
-					keys.A = FALSE;
-					break;
-				case SDL_SCANCODE_D:
-					keys.D = FALSE;
-					break;
-				case SDL_SCANCODE_SPACE:
-					keys.SPACE = FALSE;
-					break;
-				case SDL_SCANCODE_LSHIFT:
-					keys.LSHIFT = FALSE;
-					break;
-				case SDL_SCANCODE_UP:
-					keys.UP = FALSE;
-					break;
-				case SDL_SCANCODE_DOWN:
-					keys.DOWN = FALSE;
-					break;
-				case SDL_SCANCODE_LEFT:
-					keys.LEFT = FALSE;
-					break;
-				case SDL_SCANCODE_RIGHT:
-					keys.RIGHT = FALSE;
-					break;
-				}
-				break;
 			}
 		}
+		capture_input();
 		move_camera();
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
