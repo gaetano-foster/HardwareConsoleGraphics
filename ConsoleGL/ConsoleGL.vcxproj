@@ -134,6 +134,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\libs\glad-3.3\src\glad.c" />
+    <ClCompile Include="camera.c" />
     <ClCompile Include="conscr.c" />
     <ClCompile Include="context.c" />
     <ClCompile Include="main.c" />
@@ -142,6 +143,7 @@
     <ClCompile Include="shader.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="camera.h" />
     <ClInclude Include="conscr.h" />
     <ClInclude Include="context.h" />
     <ClInclude Include="expect.h" />
