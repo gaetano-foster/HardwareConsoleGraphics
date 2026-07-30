@@ -5,6 +5,7 @@
 #include "mesh.h"
 #include "shader.h"
 #include "object.h"
+#include "camera.h"
 
 void
 object_init(object_t *object)
@@ -15,7 +16,13 @@ object_init(object_t *object)
 void
 object_draw(object_t *object)
 {
+	mat4 proj, view;
+	camera_proj(proj);
+	camera_view(view);
+
 	shader_use(object->shader);
+	glUniformMatrix4fv(object->shader->proj_loc, 1, GL_FALSE, (float*)proj);
+	glUniformMatrix4fv(object->shader->view_loc, 1, GL_FALSE, (float*)view);
 	glUniformMatrix4fv(object->shader->model_loc, 1, GL_FALSE, (float*)object->transform);
 	mesh_draw(object->mesh);
 }
@@ -77,4 +84,11 @@ object_scale(object_t *object,
 	float scale)
 {
 	glm_mat4_scale(object->transform, scale);
+}
+
+void 
+object_setpos(object_t *object,
+	vec3 pos)
+{
+	glm_translate_to(object->transform, pos, object->transform);
 }
