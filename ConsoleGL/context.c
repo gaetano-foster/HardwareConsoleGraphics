@@ -29,7 +29,12 @@ context_init(int width, int height)
 	if (!(win = SDL_CreateWindow("", 
 		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
 		width, height, 
-		SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN))) {
+		SDL_WINDOW_OPENGL 
+#ifdef _DEBUG
+		| SDL_WINDOW_SHOWN))) {
+#else
+		| SDL_WINDOW_HIDDEN))) {
+#endif
 		fprintf(stderr, "Failed to create window: %s\n", SDL_GetError());
 		SDL_Quit();
 		return 0;
