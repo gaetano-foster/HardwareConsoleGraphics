@@ -2,39 +2,37 @@
 #define __MESH_H__
 
 /*
-Structure for storing Mesh data.
+Structure for storing Mesh data
 
 Fields:
-	- vao - Vertex Array Object ID used by OpenGL functions
-	- vbo - Vertex Buffer Object ID used by OpenGL functions 
-	- vertices - array of floats that represents the physical vertices
-	- size - total size of the vertices array
-	- count - number of vertices
-
-TODO:
-	- Vertices, size, and count don't need to be stored:
-	  Refactor to be a simple wrapper around VAO and VBO
+	- vao: Vertex Array Object ID used by OpenGL functions
+	- vbo: Vertex Buffer Object ID used by OpenGL functions 
+	- ebo: Element Buffer Object ID used by OpenGL functions 
+	- element_count: Number of indices
 */
 typedef struct _mesh_t {
 	GLuint vao;
 	GLuint vbo;
-	const float *vertices;
-	GLsizei size;
-	GLsizei count;
+	GLuint ebo;
+	GLsizei element_count;
 } mesh_t;
 
 /*
-Initializes the VAO, VBO, and count of the given mesh.
-
-Parameters:
-	- mesh_t *mesh: pointer to previously allocated mesh with caller 
-	  defined vertices and size
-
-TODO:
-	- Turn this into a function that loads a mesh from a file
+Structure for storing a vertex, including positional data,
+normal data, and UV coordinates
 */
-void
-mesh_init_buffers(mesh_t *mesh);
+typedef struct _vertex_t {
+	vec3 position;
+	vec3 normal;
+	vec2 uv;
+} vertex_t;
+
+/*
+Reads in mesh from file at specified path
+*/
+BOOL
+mesh_load(mesh_t *mesh, 
+	const char *path);
 
 /*
 Frees memory associated with mesh
