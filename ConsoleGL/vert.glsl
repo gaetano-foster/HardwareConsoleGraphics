@@ -19,5 +19,5 @@ main()
 	gl_Position = proj * view * model * vec4(aPos, 1.0);
 	normal = aNormal;
 	uv = aUV;
-	vertexColor = aPos + 0.5;
+	vertexColor = aPos;
 }
