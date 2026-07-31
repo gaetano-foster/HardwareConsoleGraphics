@@ -169,7 +169,7 @@ bgr_to_ascii(struct bgr_t bgr)
 {
 	const int MAX_BRIGHTNESS = 255;
 	// darkest to lightest characters
-	static const WCHAR *palette = L".,:-=+*#%%@@";
+	static const WCHAR *palette = L".,:-=+*#%@";
 	const size_t palette_length = wcslen(palette);
 	double brightness = 
 		0.0722 * bgr.b + 
