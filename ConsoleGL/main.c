@@ -73,18 +73,10 @@ main(int argc,
 
 	shader_t shader_program;
 	EXPECT(shader_compile(&shader_program, "vert.glsl", "frag.glsl"));
-	// triangle data
-	float vertices[] = {
-		-0.5f, -0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		0.0f, 0.5f, 0.0f 
-	};
+
 	// create mesh from vertices
-	mesh_t mesh = {
-		.vertices = vertices,
-		.size = sizeof(vertices)
-	};
-	mesh_init_buffers(&mesh);
+	mesh_t mesh;
+	EXPECT(mesh_load(&mesh, "teapot.obj"));
 
 	object_t triangle = {
 		.mesh = &mesh,
