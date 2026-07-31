@@ -28,7 +28,7 @@ capture_input()
 	keys.S = GetAsyncKeyState('S') & 0x8000;
 	keys.D = GetAsyncKeyState('D') & 0x8000;
 	keys.SPACE = GetAsyncKeyState(' ') & 0x8000;
-	keys.LSHIFT = GetAsyncKeyState(VK_SPACE) & 0x8000;
+	keys.LSHIFT = GetAsyncKeyState(VK_LSHIFT) & 0x8000;
 	keys.UP = GetAsyncKeyState(VK_UP) & 0x8000;
 	keys.LEFT = GetAsyncKeyState(VK_LEFT) & 0x8000;
 	keys.DOWN = GetAsyncKeyState(VK_DOWN) & 0x8000;
