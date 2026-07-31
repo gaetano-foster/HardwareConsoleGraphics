@@ -27,10 +27,19 @@ conscr_init();
 
 /*
 Encodes OpenGL frame buffer 0 to Console Screen frame buffer 
-and writes Console Screen frame buffer to the console
+and writes Console Screen frame buffer to the console using
+true color escape codes
 */
 void
 conscr_render();
+
+/*
+Encodes OpenGL frame buffer 0 to Console Screen frame buffer 
+and writes Console Screen frame buffer to the console using
+CHAR_INFO
+*/
+void
+conscr_renderci();
 
 /* 
 Frees memory used by the Console Screen and returns
