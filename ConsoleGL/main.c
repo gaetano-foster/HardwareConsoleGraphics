@@ -96,8 +96,8 @@ main(int argc,
 		.aspect = (float)S_WIDTH / (float)S_HEIGHT
 	};
 	camera_init(config);
-
 	shader_use(&shader_program);
+	glEnable(GL_DEPTH_TEST); 
 
 	while (running) {
 		while (SDL_PollEvent(&event)) {
