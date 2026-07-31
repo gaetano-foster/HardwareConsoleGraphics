@@ -78,12 +78,12 @@ main(int argc,
 	mesh_t mesh;
 	EXPECT(mesh_load(&mesh, "teapot.obj"));
 
-	object_t triangle = {
+	object_t teapot = {
 		.mesh = &mesh,
 		.shader = &shader_program
 	};
-	object_init(&triangle);
-	object_setpos(&triangle, (vec3) { 0.0f, 0.0f, -1.0f });
+	object_init(&teapot);
+	object_setpos(&teapot, (vec3) { 0.0f, 0.0f, -1.0f });
 
 	struct camera_config_t config = {
 		.x = -0.5,
@@ -111,7 +111,7 @@ main(int argc,
 		move_camera();
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		object_draw(&triangle);
+		object_draw(&teapot);
 		conscr_render();
 		context_swap();
 	}
