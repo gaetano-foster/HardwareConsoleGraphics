@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <Windows.h>
 #include "shader.h"
-#include "expect.h"
+#include "utils.h"
 #include "camera.h"
 
 // Returns null terminated, heap allocated string that must be freed by the caller

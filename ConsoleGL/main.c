@@ -1,10 +1,11 @@
 ﻿#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
+#include <time.h>
 #include <glad/glad.h>
 #include <SDL.h>
 #include <Windows.h>
 #include <cglm/cglm.h>
-#include "expect.h"
+#include "utils.h"
 #include "mesh.h"
 #include "conscr.h"
 #include "context.h"

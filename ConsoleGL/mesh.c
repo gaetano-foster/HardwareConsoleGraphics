@@ -7,7 +7,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include "mesh.h"
-#include "expect.h"
+#include "utils.h"
 
 static void
 mesh_build(mesh_t *mesh,
