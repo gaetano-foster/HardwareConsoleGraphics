@@ -48,6 +48,30 @@ the console's screen buffer to its original state
 void
 conscr_destroy();
 
+/*
+Enables HUD in the Console Screen
+*/
+void
+conscr_enablehud();
+
+/*
+Disables HUD in the Console Screen
+*/
+void
+conscr_disablehud();
+
+/*
+Defines the HUD message in the Console Screen
+*/
+void
+conscr_sethud(const char *msg);
+
+/*
+Returns a pointer to the HUD message in the Console Screen
+*/
+const char *
+conscr_hud();
+
 // CURRENTLY UNUSED
 CHAR_INFO 
 bgr_to_ascii(struct bgr_t bgr);

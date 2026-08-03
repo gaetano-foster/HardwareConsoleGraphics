@@ -4,7 +4,12 @@
 #include <Windows.h>
 #include "conscr.h"
 
+#define MAX_HUD_LEN			(128)
+
 static struct _conscr_t {
+	// HUD
+	char hud_message[MAX_HUD_LEN];
+	BOOL hud_enabled;
 	// char info buffers
 	CHAR_INFO *ci_buffer;
 	// true color buffers
@@ -15,7 +20,7 @@ static struct _conscr_t {
 	HANDLE original;
 	// junk data
 	DWORD bytes_written;
-} conscr_screen;
+} conscr;
 
 static void
 resize_console(HANDLE console_handle)
@@ -39,48 +44,84 @@ BOOL
 conscr_init()
 {
 	// store original screen
-	conscr_screen.original = GetStdHandle(STD_OUTPUT_HANDLE);
+	conscr.original = GetStdHandle(STD_OUTPUT_HANDLE);
+	conscr.hud_enabled = FALSE;
 
 	// allocate pixel buffer
-	if (!(conscr_screen.pixel_buffer = malloc(3 * S_WIDTH * S_HEIGHT))) {
+	if (!(conscr.pixel_buffer = malloc(3 * S_WIDTH * S_HEIGHT))) {
 		fprintf(stderr, "Failed to allocate memory for pixel buffer.\n");
 		return FALSE;
 	}
 
 	// allocate frame buffer
-	if (!(conscr_screen.frame_buffer = malloc(CELL_MAX_BYTES * S_WIDTH * S_HEIGHT))) {
+	if (!(conscr.frame_buffer = malloc(CELL_MAX_BYTES * S_WIDTH * S_HEIGHT))) {
 		fprintf(stderr, "Failed to allocate memory for frame buffer.\n");
-		free(conscr_screen.pixel_buffer);
+		free(conscr.pixel_buffer);
 		return FALSE;
 	}
 
 	// allocate char_info mode buffers
-	if (!(conscr_screen.ci_buffer = malloc(sizeof(CHAR_INFO) * S_WIDTH * S_HEIGHT))) {
+	if (!(conscr.ci_buffer = malloc(sizeof(CHAR_INFO) * S_WIDTH * S_HEIGHT))) {
 		fprintf(stderr, "Failed to allocate memory for front buffer.\n");
-		free(conscr_screen.pixel_buffer);
-		free(conscr_screen.frame_buffer);
+		free(conscr.pixel_buffer);
+		free(conscr.frame_buffer);
 		return FALSE;
 	}
 
 	// create and focus console screen buffer
-	conscr_screen.console_handle = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
-	if (conscr_screen.console_handle == INVALID_HANDLE_VALUE) {
+	conscr.console_handle = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+	if (conscr.console_handle == INVALID_HANDLE_VALUE) {
 		fprintf(stderr, "Failed to create console screen handle.\n");
-		free(conscr_screen.pixel_buffer);
-		free(conscr_screen.frame_buffer);
-		free(conscr_screen.ci_buffer);
+		free(conscr.pixel_buffer);
+		free(conscr.frame_buffer);
+		free(conscr.ci_buffer);
 		return FALSE;
 	}
 
 	DWORD mode = 0;
-	if (GetConsoleMode(conscr_screen.console_handle, &mode)) {
+	if (GetConsoleMode(conscr.console_handle, &mode)) {
 		SetConsoleOutputCP(CP_UTF8);
-		SetConsoleMode(conscr_screen.console_handle, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+		SetConsoleMode(conscr.console_handle, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
 	}
 
-	SetConsoleActiveScreenBuffer(conscr_screen.console_handle);
-	resize_console(conscr_screen.console_handle);
+	SetConsoleActiveScreenBuffer(conscr.console_handle);
+	resize_console(conscr.console_handle);
 	return TRUE;
+}
+
+static void
+hud_render() 
+{
+	char message[MAX_HUD_LEN + 20] = "\x1b[38;2;255;255;255m";
+	strcat(message, conscr.hud_message);
+
+	SetConsoleCursorPosition(
+		conscr.console_handle,
+		(COORD){ 0, 0 }
+	);
+	WriteConsoleA(
+		conscr.console_handle, 
+		message, 
+		strlen(message),
+		&conscr.bytes_written, 
+		NULL
+	);
+}
+
+static void
+hud_renderci() 
+{
+	SetConsoleCursorPosition(
+		conscr.console_handle,
+		(COORD){ 0, 0 }
+	);
+	WriteConsoleA(
+		conscr.console_handle, 
+		conscr.hud_message, 
+		MAX_HUD_LEN, 
+		&conscr.bytes_written, 
+		NULL
+	);
 }
 
 void
@@ -90,24 +131,27 @@ conscr_renderci()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glReadBuffer(GL_FRONT);
-	glReadPixels(0, 0, S_WIDTH, S_HEIGHT, GL_BGR, GL_UNSIGNED_BYTE, conscr_screen.pixel_buffer);
-	struct bgr_t *buf = (struct bgr_t *)(conscr_screen.pixel_buffer);
+	glReadPixels(0, 0, S_WIDTH, S_HEIGHT, GL_BGR, GL_UNSIGNED_BYTE, conscr.pixel_buffer);
+	struct bgr_t *buf = (struct bgr_t *)(conscr.pixel_buffer);
 	// TODO: find better way of doing this
 	for (int y = 0; y < S_HEIGHT; y++) {
 		for (int x = 0; x < S_WIDTH; x++) {
-			conscr_screen.ci_buffer[y * S_WIDTH + x] = bgr_to_ascii(buf[((S_HEIGHT - 1 - y) * S_WIDTH + x)]);
+			conscr.ci_buffer[y * S_WIDTH + x] = bgr_to_ascii(buf[((S_HEIGHT - 1 - y) * S_WIDTH + x)]);
 		}
 	}
 	glPixelStorei(GL_PACK_ALIGNMENT, 4);
 	// write screen buffer data to console
 	SMALL_RECT write_region = { 0, 0, S_WIDTH - 1, S_HEIGHT - 1 };
 	WriteConsoleOutputW(
-		conscr_screen.console_handle, 
-		conscr_screen.ci_buffer, 
+		conscr.console_handle, 
+		conscr.ci_buffer, 
 		(COORD) { S_WIDTH, S_HEIGHT }, 
 		(COORD) { 0, 0 }, 
 		&write_region
 	);
+#ifdef _DEBUG
+	if (conscr.hud_enabled) hud_renderci();
+#endif
 }
 
 void
@@ -124,10 +168,10 @@ conscr_render()
 		S_WIDTH, S_HEIGHT, 
 		GL_BGR, 
 		GL_UNSIGNED_BYTE, 
-		conscr_screen.pixel_buffer);
+		conscr.pixel_buffer);
 
-	struct bgr_t *buf = (struct bgr_t *)(conscr_screen.pixel_buffer);
-	char *fb = conscr_screen.frame_buffer;
+	struct bgr_t *buf = (struct bgr_t *)(conscr.pixel_buffer);
+	char *fb = conscr.frame_buffer;
 	// move cursor to 0, 0
 	fb += sprintf(fb, "\x1b[H");
 
@@ -142,25 +186,52 @@ conscr_render()
 		}
 	}
 
-	DWORD chars_to_write = fb - conscr_screen.frame_buffer; // difference between fb pointer and starting frame buffer pointer = number of characters to write
+	DWORD chars_to_write = fb - conscr.frame_buffer; // difference between fb pointer and starting frame buffer pointer = number of characters to write
 	WriteConsoleA(
-		conscr_screen.console_handle,
-		conscr_screen.frame_buffer,
+		conscr.console_handle,
+		conscr.frame_buffer,
 		chars_to_write,
-		&conscr_screen.bytes_written,
+		&conscr.bytes_written,
 		NULL);
 
 	glPixelStorei(GL_PACK_ALIGNMENT, 4);
+#ifdef _DEBUG
+	if (conscr.hud_enabled) hud_render();
+#endif
 }
 
 void
 conscr_destroy()
 {
-	SetConsoleActiveScreenBuffer(conscr_screen.original);
-	CloseHandle(conscr_screen.console_handle);
-	free(conscr_screen.pixel_buffer);
-	free(conscr_screen.frame_buffer);
-	free(conscr_screen.ci_buffer);
+	SetConsoleActiveScreenBuffer(conscr.original);
+	CloseHandle(conscr.console_handle);
+	free(conscr.pixel_buffer);
+	free(conscr.frame_buffer);
+	free(conscr.ci_buffer);
+}
+
+void
+conscr_enablehud()
+{
+	conscr.hud_enabled = TRUE;
+}
+
+void
+conscr_disablehud()
+{
+	conscr.hud_enabled = FALSE;
+}
+
+void
+conscr_sethud(const char *msg)
+{
+	strcpy(conscr.hud_message, msg);
+}
+
+const char *
+conscr_hud()
+{
+	return conscr.hud_message;
 }
 
 // TODO: Use lookup table and match colors to nearest instead for better fidelity
