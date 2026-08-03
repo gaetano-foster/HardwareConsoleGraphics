@@ -1,4 +1,5 @@
-﻿#include <stdio.h>
+﻿#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
 #include <glad/glad.h>
 #include <SDL.h>
 #include <Windows.h>
@@ -38,18 +39,24 @@ capture_input()
 void
 move_camera()
 {
+	vec3 cam_angle;
+	camera_euler(cam_angle);
+	float pitch = cam_angle[0];
+	float yaw = cam_angle[1];
+	float roll = cam_angle[2];
+
 	if (keys.W)
-		camera_translatel((vec3) { 0, 0, SPEED });
+		camera_translatew((vec3) { SPEED * cosf(yaw), 0, SPEED * sinf(yaw) });
 	if (keys.S)
-		camera_translatel((vec3) { 0, 0, -SPEED });
+		camera_translatew((vec3) { SPEED * -cosf(yaw), 0, SPEED * -sinf(yaw) });
 	if (keys.A)
-		camera_translatel((vec3) { -SPEED, 0, 0 });
+		camera_translatew((vec3) { SPEED * sinf(yaw), 0, SPEED * -cosf(yaw) });
 	if (keys.D)
-		camera_translatel((vec3) { SPEED, 0, 0 });
+		camera_translatew((vec3) { SPEED * -sinf(yaw), 0, SPEED * cosf(yaw) });
 	if (keys.SPACE)
-		camera_translatel((vec3) { 0, SPEED, 0 });
+		camera_translatew((vec3) { 0, SPEED, 0 });
 	if (keys.LSHIFT)
-		camera_translatel((vec3) { 0, -SPEED, 0 });
+		camera_translatew((vec3) { 0, -SPEED, 0 });
 	if (keys.UP)
 		camera_rotate_rad((vec3) { SENS, 0, 0 });
 	if (keys.DOWN)
@@ -58,6 +65,9 @@ move_camera()
 		camera_rotate_rad((vec3) { 0, -SENS, 0 });
 	if (keys.RIGHT)
 		camera_rotate_rad((vec3) { 0, SENS, 0 });
+
+	if (pitch > glm_rad(89.9)) camera_setrot_rad((vec3) { glm_rad(89.9), yaw, roll });
+	if (pitch < glm_rad(-89.9)) camera_setrot_rad((vec3) { glm_rad(-89.9), yaw, roll });
 }
 
 int
@@ -70,6 +80,7 @@ main(int argc,
 
 	EXPECT(context_init(S_WIDTH, S_HEIGHT));
 	EXPECT(conscr_init());
+	conscr_enablehud();
 
 	shader_t shader_program;
 	EXPECT(shader_compile(&shader_program, "vert.glsl", "frag.glsl"));
@@ -112,7 +123,7 @@ main(int argc,
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		object_draw(&teapot);
-		conscr_render();
+		conscr_renderci();
 		context_swap();
 	}
 
