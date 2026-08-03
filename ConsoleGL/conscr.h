@@ -61,18 +61,6 @@ void
 conscr_destroy();
 
 /*
-Enables HUD in the Console Screen
-*/
-void
-conscr_enablehud();
-
-/*
-Disables HUD in the Console Screen
-*/
-void
-conscr_disablehud();
-
-/*
 Defines the HUD message in the Console Screen
 */
 void

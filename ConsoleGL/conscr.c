@@ -7,7 +7,6 @@
 static struct _conscr_t {
 	// HUD
 	char hud_message[HUD_MAX_LEN];
-	BOOL hud_enabled;
 	// char info buffers
 	CHAR_INFO *ci_buffer;
 	// true color buffers
@@ -43,7 +42,6 @@ conscr_init()
 {
 	// store original screen
 	conscr.original = GetStdHandle(STD_OUTPUT_HANDLE);
-	conscr.hud_enabled = FALSE;
 
 	// allocate pixel buffer
 	if (!(conscr.pixel_buffer = malloc(3 * S_WIDTH * S_HEIGHT))) {
@@ -148,7 +146,7 @@ conscr_renderci()
 		&write_region
 	);
 #ifdef _DEBUG
-	if (conscr.hud_enabled) hud_renderci();
+	hud_renderci();
 #endif
 }
 
@@ -194,7 +192,7 @@ conscr_render()
 
 	glPixelStorei(GL_PACK_ALIGNMENT, 4);
 #ifdef _DEBUG
-	if (conscr.hud_enabled) hud_render();
+	hud_render();
 #endif
 }
 
@@ -206,18 +204,6 @@ conscr_destroy()
 	free(conscr.pixel_buffer);
 	free(conscr.frame_buffer);
 	free(conscr.ci_buffer);
-}
-
-void
-conscr_enablehud()
-{
-	conscr.hud_enabled = TRUE;
-}
-
-void
-conscr_disablehud()
-{
-	conscr.hud_enabled = FALSE;
 }
 
 void
