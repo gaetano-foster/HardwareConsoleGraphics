@@ -146,7 +146,7 @@
     <ClInclude Include="camera.h" />
     <ClInclude Include="conscr.h" />
     <ClInclude Include="context.h" />
-    <ClInclude Include="expect.h" />
+    <ClInclude Include="utils.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="object.h" />
     <ClInclude Include="shader.h" />
