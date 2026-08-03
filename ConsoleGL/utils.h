@@ -11,14 +11,13 @@
 		}										\
     } while (0)
 
-#define TIME(VAR, ACTION) \
+#define TIME(VAR, ...) \
 do { \
     clock_t start, end; \
-    double time_millis; \
     start = clock(); \
-    do { ACTION } while(0); \
+    do { __VA_ARGS__ } while(0); \
     end = clock(); \
-    VAR = ((double) (end - start)) / (CLOCKS_PER_SEC / 1000); \
+    VAR = ((double) (end - start) * 1000.0) / CLOCKS_PER_SEC; \
 } while(0)
 
 
