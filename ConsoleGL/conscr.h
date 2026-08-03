@@ -1,10 +1,22 @@
 ﻿#ifndef __CONSOLE_SCREEN__
 #define __CONSOLE_SCREEN__
 
-#define S_WIDTH			(120)
-#define S_HEIGHT		(40)
-#define FONT_SIZE		(16)		
-#define CELL_MAX_BYTES	(32)
+#define S_WIDTH				(120)
+#define S_HEIGHT			(40)
+#define FONT_SIZE			(16)		
+#define CELL_MAX_BYTES		(32)
+#define HUD_MAX_LEN			(128)
+
+#ifdef _DEBUG
+#define CONSCR_HUD_FMT(FMT, ...) \
+do { \
+	char message[HUD_MAX_LEN]; \
+	sprintf(message, FMT, __VA_ARGS__); \
+	conscr_sethud(message); \
+} while(0)
+#else
+#define CONSCR_HUD_FMT(FMT, ...)	(void*)(0)
+#endif
 
 /*
 Represents one 24-bit-pixel in BGR format. 3 BYTEs

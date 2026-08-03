@@ -4,11 +4,9 @@
 #include <Windows.h>
 #include "conscr.h"
 
-#define MAX_HUD_LEN			(128)
-
 static struct _conscr_t {
 	// HUD
-	char hud_message[MAX_HUD_LEN];
+	char hud_message[HUD_MAX_LEN];
 	BOOL hud_enabled;
 	// char info buffers
 	CHAR_INFO *ci_buffer;
@@ -92,7 +90,7 @@ conscr_init()
 static void
 hud_render() 
 {
-	char message[MAX_HUD_LEN + 20] = "\x1b[38;2;255;255;255m";
+	char message[HUD_MAX_LEN + 20] = "\x1b[38;2;255;255;255m";
 	strcat(message, conscr.hud_message);
 
 	SetConsoleCursorPosition(
@@ -118,7 +116,7 @@ hud_renderci()
 	WriteConsoleA(
 		conscr.console_handle, 
 		conscr.hud_message, 
-		MAX_HUD_LEN, 
+		HUD_MAX_LEN, 
 		&conscr.bytes_written, 
 		NULL
 	);
