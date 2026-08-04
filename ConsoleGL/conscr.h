@@ -14,6 +14,14 @@ do { \
 	sprintf(message, FMT, __VA_ARGS__); \
 	conscr_sethud(message); \
 } while(0)
+
+#define CONSCR_HUD_CAT(FMT, ...) \
+do { \
+	char message[HUD_MAX_LEN]; \
+	sprintf(message, FMT, __VA_ARGS__); \
+	strcat(message, conscr_hud());	\
+	conscr_sethud(message); \
+} while(0)
 #else
 #define CONSCR_HUD_FMT(FMT, ...)	(void*)(0)
 #endif
