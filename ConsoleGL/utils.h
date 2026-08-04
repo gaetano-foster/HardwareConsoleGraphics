@@ -13,12 +13,13 @@
 
 #define TIME(VAR, ...) \
 do { \
-    clock_t start, end; \
-    start = clock(); \
-    do { __VA_ARGS__ } while(0); \
-    end = clock(); \
-    VAR = ((double) (end - start) * 1000.0) / CLOCKS_PER_SEC; \
-} while(0)
+    LARGE_INTEGER start, end, freq; \
+    QueryPerformanceFrequency(&freq); \
+    QueryPerformanceCounter(&start); \
+    do { __VA_ARGS__; } while (0); \
+    QueryPerformanceCounter(&end); \
+    (VAR) = ((double)(end.QuadPart - start.QuadPart) * 1000.0) / (double)freq.QuadPart; \
+} while (0)
 
 
 #endif

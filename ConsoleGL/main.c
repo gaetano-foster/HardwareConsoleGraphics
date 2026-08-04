@@ -1,6 +1,5 @@
 ﻿#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
-#include <time.h>
 #include <glad/glad.h>
 #include <SDL.h>
 #include <Windows.h>
@@ -23,8 +22,9 @@ struct {
 	struct {
 		SDL_Event event;
 		BOOL running;
-		clock_t last_time;
-		clock_t timer;
+		LARGE_INTEGER last_time;
+		LARGE_INTEGER timer;
+		LARGE_INTEGER freq;
 		INT32 target_fps;
 		double time_per_tick;
 		double delta; 
@@ -118,10 +118,11 @@ init()
 	};
 	camera_init(config);
 	// initialize loop variables
-	state.loop.last_time = clock();
-	state.loop.timer = 0;
-	state.loop.target_fps = 72;
-	state.loop.time_per_tick = CLOCKS_PER_SEC / state.loop.target_fps;
+	QueryPerformanceFrequency(&state.loop.freq);
+	QueryPerformanceCounter(&state.loop.last_time);
+	state.loop.timer.QuadPart = 0;
+	state.loop.target_fps = 10000;
+	state.loop.time_per_tick = (double)state.loop.freq.QuadPart / state.loop.target_fps;
 	state.loop.delta = 0; 
 	state.loop.delta_time = (double)1 / (double)state.loop.target_fps;
 	state.loop.frames = 0;
@@ -139,11 +140,12 @@ void
 render()
 {
 	conscr_sethud(""); // reset hud between frames
-	CONSCR_HUD_FMT("FPS: %d", state.loop.fps);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	object_draw(&state.teapot);
 	conscr_renderci();
+	CONSCR_HUD_CAT("FPS: %d               \n", state.loop.fps);
+	conscr_rendercihud();
 	context_swap();
 }
 
@@ -154,22 +156,24 @@ run()
 	while (state.loop.running) {
 		while (SDL_PollEvent(&state.loop.event)) state.loop.running = state.loop.event.type != SDL_QUIT;
 
-		clock_t now = clock();
-		state.loop.delta += (now - state.loop.last_time) / state.loop.time_per_tick;
-		state.loop.timer += now - state.loop.last_time;
+		LARGE_INTEGER now;
+		QueryPerformanceCounter(&now);
+		LONGLONG elapsed = now.QuadPart - state.loop.last_time.QuadPart;
+		state.loop.delta += elapsed / state.loop.time_per_tick;
+		state.loop.timer.QuadPart += elapsed;
 		state.loop.last_time = now;
 
 		if (state.loop.delta >= 1) {
+			if (state.loop.timer.QuadPart >= state.loop.freq.QuadPart) {
+				state.loop.fps = state.loop.frames;
+				state.loop.delta_time = (double)(1 / (double)state.loop.fps);
+				state.loop.timer.QuadPart = 0;
+				state.loop.frames = 0;
+			}
 			tick();
 			render();
 			state.loop.delta--;
 			state.loop.frames++;
-			if (state.loop.timer >= CLOCKS_PER_SEC) {
-				state.loop.fps = state.loop.frames;
-				state.loop.delta_time = (double)(1 / (double)state.loop.fps);
-				state.loop.timer = 0;
-				state.loop.frames = 0;
-			}
 		}
 	}
 }
