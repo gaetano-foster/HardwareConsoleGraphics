@@ -54,6 +54,7 @@ context_init(int width, int height)
 		SDL_Quit();
 		return FALSE;
 	}
+	glEnable(GL_DEPTH_TEST); 
 
 	return TRUE;
 }
