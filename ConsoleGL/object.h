@@ -17,9 +17,6 @@ typedef struct _object_t {
 
 /* 
 Initializes the transform of object_t instance
-
-TODO:
-	- Allow the caller to define transform on initialization
 */
 void
 object_init(object_t *object);
@@ -29,7 +26,6 @@ Uses object->shader and draws object->mesh to OpenGL frame buffer
 */
 void
 object_draw(object_t *object);
-
 
 ////
 /// TRANSFORM FUNCTIONS

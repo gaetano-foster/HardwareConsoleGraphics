@@ -20,11 +20,11 @@ object_draw(object_t *object)
 	camera_proj(proj);
 	camera_view(view);
 
-	shader_use(object->shader);
+	shader_use(*object->shader);
 	glUniformMatrix4fv(object->shader->proj_loc, 1, GL_FALSE, (float*)proj);
 	glUniformMatrix4fv(object->shader->view_loc, 1, GL_FALSE, (float*)view);
 	glUniformMatrix4fv(object->shader->model_loc, 1, GL_FALSE, (float*)object->transform);
-	mesh_draw(object->mesh);
+	mesh_draw(*object->mesh);
 }
 
 ////
