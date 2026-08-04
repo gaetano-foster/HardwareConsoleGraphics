@@ -99,8 +99,10 @@ init()
 	EXPECT(context_init(S_WIDTH, S_HEIGHT));
 	EXPECT(conscr_init());
 	// build teapot object
-	EXPECT(shader_compile(&state.teapot.shader, "vert.glsl", "frag.glsl"));
-	EXPECT(mesh_load(&state.teapot.mesh, "teapot.obj"));
+	EXPECT(state.teapot.shader = malloc(sizeof(shader_t)));
+	EXPECT(state.teapot.mesh = malloc(sizeof(mesh_t)));
+	EXPECT(shader_compile(state.teapot.shader, "vert.glsl", "frag.glsl"));
+	EXPECT(mesh_load(state.teapot.mesh, "teapot.obj"));
 	object_init(&state.teapot);
 	object_setpos(&state.teapot, (vec3) { 0.0f, 0.0f, -1.0f });
 	// configure camera
@@ -174,8 +176,10 @@ run()
 void
 cleanup()
 {
-	mesh_destroy(state.teapot.mesh);
-	shader_destroy(state.teapot.shader);
+	mesh_destroy(*state.teapot.mesh);
+	shader_destroy(*state.teapot.shader);
+	free(state.teapot.shader);
+	free(state.teapot.mesh);
 	context_destroy();
 	conscr_destroy();
 }
