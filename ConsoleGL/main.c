@@ -138,6 +138,8 @@ tick()
 void
 render()
 {
+	conscr_sethud(""); // reset hud between frames
+	CONSCR_HUD_FMT("FPS: %d", state.loop.fps);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	object_draw(&state.teapot);
@@ -167,7 +169,6 @@ run()
 				state.loop.delta_time = (double)(1 / (double)state.loop.fps);
 				state.loop.timer = 0;
 				state.loop.frames = 0;
-				CONSCR_HUD_FMT("FPS: %d", state.loop.fps);
 			}
 		}
 	}
