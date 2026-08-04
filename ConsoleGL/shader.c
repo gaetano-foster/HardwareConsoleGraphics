@@ -109,13 +109,13 @@ shader_compile(shader_t *shader,
 }
 
 void
-shader_destroy(shader_t *shader)
+shader_destroy(shader_t shader)
 {
-	glDeleteProgram(shader->id);
+	glDeleteProgram(shader.id);
 }
 
 void
-shader_use(shader_t *shader)
+shader_use(shader_t shader)
 {
-	glUseProgram(shader->id);
+	glUseProgram(shader.id);
 }

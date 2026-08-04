@@ -38,12 +38,12 @@ mesh_load(mesh_t *mesh,
 Frees memory associated with mesh
 */
 void
-mesh_destroy(mesh_t *mesh);
+mesh_destroy(mesh_t mesh);
 
 /*
 Draws the mesh to the OpenGL frame buffer
 */
 void
-mesh_draw(mesh_t *mesh);
+mesh_draw(mesh_t mesh);
 
 #endif // !__MESH_H__

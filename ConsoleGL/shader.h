@@ -33,12 +33,12 @@ shader_compile(shader_t *shader,
 Frees memory associated with shader
 */
 void
-shader_destroy(shader_t *shader);
+shader_destroy(shader_t shader);
 
 /*
 Tells OpenGL context to use shader
 */
 void
-shader_use(shader_t *shader);
+shader_use(shader_t shader);
 
 #endif
