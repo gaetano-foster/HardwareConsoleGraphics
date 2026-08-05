@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <Windows.h>
 #include "conscr.h"
+#include "utils.h"
 
 static struct _conscr_t {
 	// HUD
@@ -18,6 +19,11 @@ static struct _conscr_t {
 	// junk data
 	DWORD bytes_written;
 } conscr;
+
+static struct {
+	double time_reading, time_writing, time_printing, time_gl;
+	int frames;
+} debug_accumulator;
 
 static void
 resize_console(HANDLE console_handle)
@@ -85,8 +91,8 @@ conscr_init()
 	return TRUE;
 }
 
-static void
-hud_render() 
+void
+conscr_renderhud() 
 {
 	char message[HUD_MAX_LEN + 20] = "\x1b[38;2;255;255;255m";
 	strcat(message, conscr.hud_message);
@@ -104,8 +110,8 @@ hud_render()
 	);
 }
 
-static void
-hud_renderci() 
+void
+conscr_rendercihud() 
 {
 	SetConsoleCursorPosition(
 		conscr.console_handle,
@@ -123,42 +129,55 @@ hud_renderci()
 void
 conscr_renderci()
 {
+	double write_time_millis = 0, print_time_millis = 0;
+
 	// write frame buffer data to screen buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	glReadBuffer(GL_FRONT);
-	glReadPixels(0, 0, S_WIDTH, S_HEIGHT, GL_BGR, GL_UNSIGNED_BYTE, conscr.pixel_buffer);
+	glReadBuffer(GL_COLOR_ATTACHMENT0);
+	glReadPixels(
+		0, 0, 
+		S_WIDTH, S_HEIGHT, 
+		GL_BGR, 
+		GL_UNSIGNED_BYTE, 
+		conscr.pixel_buffer);
+
 	struct bgr_t *buf = (struct bgr_t *)(conscr.pixel_buffer);
 	// TODO: find better way of doing this
+	TIME(write_time_millis,
 	for (int y = 0; y < S_HEIGHT; y++) {
 		for (int x = 0; x < S_WIDTH; x++) {
-			conscr.ci_buffer[y * S_WIDTH + x] = bgr_to_ascii(buf[((S_HEIGHT - 1 - y) * S_WIDTH + x)]);
+			conscr.ci_buffer[y * S_WIDTH + x] = bgr_to_ascii(buf[(y * S_WIDTH + x)]);
 		}
 	}
+	);
 	glPixelStorei(GL_PACK_ALIGNMENT, 4);
+	CONSCR_HUD_CAT("WRITE TIME: %.6f  \n", write_time_millis);
+
 	// write screen buffer data to console
-	SMALL_RECT write_region = { 0, 0, S_WIDTH - 1, S_HEIGHT - 1 };
-	WriteConsoleOutputW(
+	TIME(print_time_millis, 
+	SMALL_RECT write_region = {0, 0, S_WIDTH - 1, S_HEIGHT - 1};
+	WriteConsoleOutput(
 		conscr.console_handle, 
 		conscr.ci_buffer, 
 		(COORD) { S_WIDTH, S_HEIGHT }, 
 		(COORD) { 0, 0 }, 
-		&write_region
+		&write_region);
 	);
-#ifdef _DEBUG
-	hud_renderci();
-#endif
+	CONSCR_HUD_CAT("PRINT TIME: %.6f  \n", print_time_millis);
+
+	debug_accumulator.time_writing += write_time_millis;
+	debug_accumulator.time_printing += print_time_millis;
+	debug_accumulator.frames++;
 }
 
 void
 conscr_render()
 {
-	// write frame buffer data to screen buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	glReadBuffer(GL_FRONT);
+	double write_time_millis = 0, print_time_millis = 0;
 
-	// read raw color data into pixel buffer
+	// write frame buffer data to screen buffer
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glReadBuffer(GL_COLOR_ATTACHMENT0);
 	glReadPixels(
 		0, 0, 
 		S_WIDTH, S_HEIGHT, 
@@ -169,6 +188,7 @@ conscr_render()
 	struct bgr_t *buf = (struct bgr_t *)(conscr.pixel_buffer);
 	char *fb = conscr.frame_buffer;
 	// move cursor to 0, 0
+	TIME(write_time_millis, 
 	fb += sprintf(fb, "\x1b[H");
 
 	// encode color + character data into framebuffer
@@ -181,7 +201,11 @@ conscr_render()
 				color.r, color.g, color.b);
 		}
 	}
+	);
+	CONSCR_HUD_CAT("WRITE TIME: %.6f  \n", write_time_millis);
+	glPixelStorei(GL_PACK_ALIGNMENT, 4);
 
+	TIME(print_time_millis,
 	DWORD chars_to_write = fb - conscr.frame_buffer; // difference between fb pointer and starting frame buffer pointer = number of characters to write
 	WriteConsoleA(
 		conscr.console_handle,
@@ -189,11 +213,12 @@ conscr_render()
 		chars_to_write,
 		&conscr.bytes_written,
 		NULL);
+	);
+	CONSCR_HUD_CAT("PRINT TIME: %.6f  \n", print_time_millis);
 
-	glPixelStorei(GL_PACK_ALIGNMENT, 4);
-#ifdef _DEBUG
-	hud_render();
-#endif
+	debug_accumulator.time_writing += write_time_millis;
+	debug_accumulator.time_printing += print_time_millis;
+	debug_accumulator.frames++;
 }
 
 void
@@ -204,6 +229,7 @@ conscr_destroy()
 	free(conscr.pixel_buffer);
 	free(conscr.frame_buffer);
 	free(conscr.ci_buffer);
+	printf("AVG WRITING TIME: %.6f\nAVG PRINTING TIME: %.6f\n", debug_accumulator.time_writing / debug_accumulator.frames, debug_accumulator.time_printing / debug_accumulator.frames);
 }
 
 void
