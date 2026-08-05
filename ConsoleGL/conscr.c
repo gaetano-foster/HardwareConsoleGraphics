@@ -162,6 +162,10 @@ append_color(char *p,
 	GLuint r, GLuint g, GLuint b)
 {
 	char *t = p; // save original pointer spot
+	// throw away least significant bits for imperceptibly close colors
+	r &= TC_COLOR_MASK;
+	g &= TC_COLOR_MASK;
+	b &= TC_COLOR_MASK;
 	
 	if (tc_prev_r == r
 		&& tc_prev_g == g
