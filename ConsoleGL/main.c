@@ -152,10 +152,10 @@ render()
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	object_draw(&state.teapot);
-	conscr_renderci();
+	conscr_render();
 	CONSCR_HUD_CAT("FPS: %d               \n", state.loop.fps);
 	CONSCR_HUD_CAT("TPS: %d               \n", state.loop.tps);
-	conscr_rendercihud();
+	conscr_renderhud();
 	context_swap();
 }
 
