@@ -7,7 +7,6 @@
 #define CELL_MAX_BYTES		(32)
 #define HUD_MAX_LEN			(128)
 
-#ifdef _DEBUG
 #define CONSCR_HUD_FMT(FMT, ...) \
 do { \
 	char message[HUD_MAX_LEN]; \
@@ -22,9 +21,6 @@ do { \
 	strcat(message, conscr_hud());	\
 	conscr_sethud(message); \
 } while(0)
-#else
-#define CONSCR_HUD_FMT(FMT, ...)	(void*)(0)
-#endif
 
 /*
 Represents one 24-bit-pixel in BGR format. 3 BYTEs
@@ -79,6 +75,18 @@ Returns a pointer to the HUD message in the Console Screen
 */
 const char *
 conscr_hud();
+
+/*
+Renders the hud for True Color mode
+*/
+void
+conscr_renderhud();
+
+/*
+Renders the hud for CHAR_INFO mode
+*/
+void
+conscr_rendercihud();
 
 // CURRENTLY UNUSED
 CHAR_INFO 
