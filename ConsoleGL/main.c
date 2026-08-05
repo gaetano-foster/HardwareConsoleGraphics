@@ -26,11 +26,13 @@ struct {
 		LARGE_INTEGER last_time;
 		LARGE_INTEGER timer;
 		LARGE_INTEGER freq;
-		INT32 target_fps;
+		INT32 target_tps;
 		double time_per_tick;
 		double delta; 
 		double delta_time;
+		INT32 ticks;
 		INT32 frames;
+		INT32 tps;
 		INT32 fps;
 	} loop;
 	object_t teapot;
@@ -124,12 +126,13 @@ init()
 	QueryPerformanceFrequency(&state.loop.freq);
 	QueryPerformanceCounter(&state.loop.last_time);
 	state.loop.timer.QuadPart = 0;
-	state.loop.target_fps = 10000;
-	state.loop.time_per_tick = (double)state.loop.freq.QuadPart / state.loop.target_fps;
+	state.loop.target_tps = 144;
+	state.loop.time_per_tick = (double)state.loop.freq.QuadPart / state.loop.target_tps;
 	state.loop.delta = 0; 
-	state.loop.delta_time = (double)1 / (double)state.loop.target_fps;
+	state.loop.delta_time = 1.0 / state.loop.target_tps;
 	state.loop.frames = 0;
-	state.loop.fps = state.loop.target_fps;
+	state.loop.fps = 0;
+	state.loop.tps = state.loop.target_tps;
 }
 
 void
@@ -159,27 +162,36 @@ void
 run()
 {
 	state.loop.running = TRUE;
+
 	while (state.loop.running) {
 		while (SDL_PollEvent(&state.loop.event)) state.loop.running = state.loop.event.type != SDL_QUIT;
 
 		LARGE_INTEGER now;
 		QueryPerformanceCounter(&now);
-		LONGLONG elapsed = now.QuadPart - state.loop.last_time.QuadPart;
-		state.loop.delta += elapsed / state.loop.time_per_tick;
-		state.loop.timer.QuadPart += elapsed;
-		state.loop.last_time = now;
 
-		if (state.loop.delta >= 1) {
-			if (state.loop.timer.QuadPart >= state.loop.freq.QuadPart) {
-				state.loop.fps = state.loop.frames;
-				state.loop.delta_time = (double)(1 / (double)state.loop.fps);
-				state.loop.timer.QuadPart = 0;
-				state.loop.frames = 0;
-			}
+		LONGLONG elapsed = now.QuadPart - state.loop.last_time.QuadPart;
+		state.loop.last_time = now;
+		state.loop.delta_time = 1.0 / (double)state.loop.tps;
+		state.loop.delta += (double)elapsed / state.loop.time_per_tick;
+		state.loop.timer.QuadPart += elapsed;
+
+		// lock tickrate
+		while (state.loop.delta >= 1.0) {
 			tick();
-			render();
 			state.loop.delta--;
-			state.loop.frames++;
+			state.loop.ticks++;
+		}
+
+		render();
+		state.loop.frames++;
+
+		if (state.loop.timer.QuadPart >= state.loop.freq.QuadPart) {
+			state.loop.fps = state.loop.frames;
+			state.loop.tps = state.loop.ticks;
+
+			state.loop.frames = 0;
+			state.loop.ticks = 0;
+			state.loop.timer.QuadPart -= state.loop.freq.QuadPart;
 		}
 	}
 }
