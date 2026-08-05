@@ -140,12 +140,14 @@
     <ClCompile Include="main.c" />
     <ClCompile Include="mesh.c" />
     <ClCompile Include="object.c" />
+    <ClCompile Include="render_target.c" />
     <ClCompile Include="shader.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
     <ClInclude Include="conscr.h" />
     <ClInclude Include="context.h" />
+    <ClInclude Include="render_target.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="object.h" />
