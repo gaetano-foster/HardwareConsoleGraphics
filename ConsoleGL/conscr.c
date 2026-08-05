@@ -170,6 +170,52 @@ conscr_renderci()
 	debug_accumulator.frames++;
 }
 
+static unsigned int
+itos(unsigned int i, char *buf)
+{
+	int n = 0;
+	unsigned int temp = i;
+
+	do {
+		n++;
+		temp /= 10;
+	} while (temp > 0);
+
+	int idx = n - 1;
+	do {
+		buf[idx--] = (i % 10) + '0';
+		i /= 10;
+	} while (i > 0);
+
+	return n;
+}
+
+static inline size_t
+append_color(char *p, 
+	GLuint r, GLuint g, GLuint b)
+{
+	char *t = p; // save original pointer spot
+
+	*p++ = '\x1b';
+	*p++ = '[';
+	*p++ = '3';
+	*p++ = '8';
+	*p++ = ';';
+	*p++ = '2';
+	*p++ = ';';
+	p += itos(r, p);
+	*p++ = ';';
+	p += itos(g, p);
+	*p++ = ';';
+	p += itos(b, p);
+	*p++ = 'm';
+	*p++ = (char)0xE2; // for the block character
+	*p++ = (char)0x96;
+	*p++ = (char)0x88;
+
+	return p - t;
+}
+
 void
 conscr_render()
 {
@@ -187,17 +233,18 @@ conscr_render()
 
 	struct bgr_t *buf = (struct bgr_t *)(conscr.pixel_buffer);
 	char *fb = conscr.frame_buffer;
-	// move cursor to 0, 0
 	TIME(write_time_millis, 
-	fb += sprintf(fb, "\x1b[H");
+	// move cursor to 0, 0
+	*fb++ = '\x1b'; 
+	*fb++ = '[';
+	*fb++ = 'H';
 
 	// encode color + character data into framebuffer
 	for (int y = 0; y < S_HEIGHT; y++) {
 		for (int x = 0; x < S_WIDTH; x++) {
-			struct bgr_t color = buf[(S_HEIGHT - 1 - y) * S_WIDTH + x];
-			fb += sprintf(
+			struct bgr_t color = buf[y * S_WIDTH + x];
+			fb += append_color(
 				fb,
-				"\x1b[38;2;%d;%d;%dm█",
 				color.r, color.g, color.b);
 		}
 	}
