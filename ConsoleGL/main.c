@@ -11,13 +11,14 @@
 #include "shader.h"
 #include "object.h"
 #include "camera.h"
+#include "render_target.h"
 
 #define SPEED		(5)
 #define SENS		(5)
 
 struct {
 	struct {
-		BOOL W, A, S, D, SPACE, LSHIFT, UP, DOWN, LEFT, RIGHT;
+		BOOL W, A, S, D, SPACE, LSHIFT, UP, DOWN, LEFT, RIGHT, ESC;
 	} keys;
 	struct {
 		SDL_Event event;
@@ -50,6 +51,7 @@ capture_input()
 	state.keys.LEFT = GetAsyncKeyState(VK_LEFT) & 0x8000;
 	state.keys.DOWN = GetAsyncKeyState(VK_DOWN) & 0x8000;
 	state.keys.RIGHT = GetAsyncKeyState(VK_RIGHT) & 0x8000;
+	state.keys.ESC = GetAsyncKeyState(VK_ESCAPE) & 0x8000;
 }
 
 void
@@ -98,6 +100,7 @@ init()
 	// initialize screen and opengl context
 	EXPECT(context_init(S_WIDTH, S_HEIGHT));
 	EXPECT(conscr_init());
+	render_target_init(S_WIDTH, S_HEIGHT);
 	// build teapot object
 	EXPECT(state.teapot.shader = malloc(sizeof(shader_t)));
 	EXPECT(state.teapot.mesh = malloc(sizeof(mesh_t)));
@@ -134,18 +137,21 @@ tick()
 {
 	capture_input();
 	move_camera();
+
+	if (state.keys.ESC) state.loop.running = FALSE;
 }
 
 void
 render()
 {
 	conscr_sethud(""); // reset hud between frames
+	render_target_bind();
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	object_draw(&state.teapot);
-	conscr_renderci();
+	conscr_render();
 	CONSCR_HUD_CAT("FPS: %d               \n", state.loop.fps);
-	conscr_rendercihud();
+	conscr_renderhud();
 	context_swap();
 }
 
@@ -187,6 +193,7 @@ cleanup()
 	free(state.teapot.mesh);
 	context_destroy();
 	conscr_destroy();
+	render_target_cleanup();
 }
 
 int
