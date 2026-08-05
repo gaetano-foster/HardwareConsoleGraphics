@@ -37,6 +37,8 @@ static inline void
 update_proj()
 {
 	glm_perspective(camera.fov, camera.aspect, camera.near, camera.far, camera.proj);
+	vec3 scale_factor = { 1.0f, -1.0f, 1.0f };
+	glm_scale(camera.proj, scale_factor);
 }
 
 static inline void
