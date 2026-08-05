@@ -92,41 +92,6 @@ conscr_init()
 }
 
 void
-conscr_renderhud() 
-{
-	char message[HUD_MAX_LEN + 20] = "\x1b[38;2;255;255;255m";
-	strcat(message, conscr.hud_message);
-
-	SetConsoleCursorPosition(
-		conscr.console_handle,
-		(COORD){ 0, 0 }
-	);
-	WriteConsoleA(
-		conscr.console_handle, 
-		message, 
-		strlen(message),
-		&conscr.bytes_written, 
-		NULL
-	);
-}
-
-void
-conscr_rendercihud() 
-{
-	SetConsoleCursorPosition(
-		conscr.console_handle,
-		(COORD){ 0, 0 }
-	);
-	WriteConsoleA(
-		conscr.console_handle, 
-		conscr.hud_message, 
-		HUD_MAX_LEN, 
-		&conscr.bytes_written, 
-		NULL
-	);
-}
-
-void
 conscr_renderci()
 {
 	double write_time_millis = 0, print_time_millis = 0;
@@ -190,11 +155,19 @@ itos(unsigned int i, char *buf)
 	return n;
 }
 
+static int tc_prev_r, tc_prev_g, tc_prev_b; // cached color values
+
 static inline size_t
 append_color(char *p, 
 	GLuint r, GLuint g, GLuint b)
 {
 	char *t = p; // save original pointer spot
+	
+	if (tc_prev_r == r
+		&& tc_prev_g == g
+		&& tc_prev_b == b) {
+		goto block;
+	}
 
 	*p++ = '\x1b';
 	*p++ = '[';
@@ -209,9 +182,15 @@ append_color(char *p,
 	*p++ = ';';
 	p += itos(b, p);
 	*p++ = 'm';
+block:
 	*p++ = (char)0xE2; // for the block character
 	*p++ = (char)0x96;
 	*p++ = (char)0x88;
+
+	// update cached color
+	tc_prev_r = r;
+	tc_prev_g = g;
+	tc_prev_b = b;
 
 	return p - t;
 }
@@ -289,6 +268,45 @@ const char *
 conscr_hud()
 {
 	return conscr.hud_message;
+}
+
+void
+conscr_renderhud() 
+{
+	char message[HUD_MAX_LEN + 20] = "\x1b[38;2;255;255;255m";
+	strcat(message, conscr.hud_message);
+
+	SetConsoleCursorPosition(
+		conscr.console_handle,
+		(COORD){ 0, 0 }
+	);
+	WriteConsoleA(
+		conscr.console_handle, 
+		message, 
+		strlen(message),
+		&conscr.bytes_written, 
+		NULL
+	);
+	// make sure that the true color renderer remembers to change the color after this
+	tc_prev_r = 255;
+	tc_prev_g = 255;
+	tc_prev_b = 255;
+}
+
+void
+conscr_rendercihud() 
+{
+	SetConsoleCursorPosition(
+		conscr.console_handle,
+		(COORD){ 0, 0 }
+	);
+	WriteConsoleA(
+		conscr.console_handle, 
+		conscr.hud_message, 
+		HUD_MAX_LEN, 
+		&conscr.bytes_written, 
+		NULL
+	);
 }
 
 // TODO: Use lookup table and match colors to nearest instead for better fidelity
