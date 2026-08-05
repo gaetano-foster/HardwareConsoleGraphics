@@ -123,7 +123,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\gaeta\OneDrive\Documents\dev\libs\assimp\include;C:\Users\gaeta\OneDrive\Documents\dev\libs\glm\cglm\include;C:\Users\gaeta\OneDrive\Documents\dev\libs\SDL2\include;C:\Users\gaeta\OneDrive\Documents\dev\libs\glad-3.3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /Ox %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
