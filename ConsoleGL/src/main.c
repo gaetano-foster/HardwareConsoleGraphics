@@ -13,6 +13,9 @@
 #include "object.h"
 #include "camera.h"
 #include "render_target.h"
+// include shaders at compile time
+#include "block.vs.h"
+#include "block.fs.h"
 
 #define SPEED		(5)
 #define SENS		(5)
@@ -107,7 +110,7 @@ init()
 	EXPECT(state.cube.shader = malloc(sizeof(shader_t)));
 	EXPECT(state.cube.mesh = malloc(sizeof(mesh_t)));
 	EXPECT(state.cube.texture = malloc(sizeof(texture_t)));
-	EXPECT(shader_compile(state.cube.shader, "src/block.vs", "src/block.fs"));
+	EXPECT(shader_compile(state.cube.shader, block_vs, block_fs));
 	EXPECT(mesh_load(state.cube.mesh, "res/cube.obj"));
 	EXPECT(texture_load(state.cube.texture, "res/grass.jpg"));
 	object_init(&state.cube);
