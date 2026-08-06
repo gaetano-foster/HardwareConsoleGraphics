@@ -1,11 +1,7 @@
 ﻿#ifndef __CONSOLE_SCREEN__
 #define __CONSOLE_SCREEN__
-
-#define S_WIDTH				(60)
-#define S_HEIGHT			(40)
-#define FONT_SIZE			(16)		
+	
 #define CELL_MAX_BYTES		(32)
-#define TC_COLOR_MASK		(0xF0) // default: 0b11110000 aka 0xF0
 #define HUD_MAX_LEN			(256)
 
 #define CONSCR_HUD_FMT(FMT, ...) \
@@ -43,27 +39,11 @@ BOOL
 conscr_init();
 
 /*
-Encodes OpenGL frame buffer 0 to Console Screen frame buffer 
-and writes Console Screen frame buffer to the console using
-true color escape codes
+Reads pixels from render_target framebuffer and
+writes them to the console screen
 */
 void
 conscr_render();
-
-/*
-Encodes OpenGL frame buffer 0 to Console Screen frame buffer 
-and writes Console Screen frame buffer to the console using
-CHAR_INFO
-*/
-void
-conscr_renderci();
-
-/* 
-Frees memory used by the Console Screen and returns
-the console's screen buffer to its original state
-*/
-void
-conscr_destroy();
 
 /*
 Defines the HUD message in the Console Screen
@@ -78,18 +58,24 @@ const char *
 conscr_hud();
 
 /*
-Renders the hud for True Color mode
+Writes the hud message to the console
 */
 void
 conscr_renderhud();
 
-/*
-Renders the hud for CHAR_INFO mode
+/* 
+Frees memory used by the Console Screen and returns
+the console's screen buffer to its original state
 */
 void
-conscr_rendercihud();
+conscr_destroy();
 
-// CURRENTLY UNUSED
+/*
+Convert BGR into closest CHAR_INFO
+
+glyph used for brightness,
+attributes used for color
+*/
 CHAR_INFO 
 bgr_to_ascii(struct bgr_t bgr);
 
