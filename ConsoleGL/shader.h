@@ -10,6 +10,7 @@ typedef struct _shader_t {
 	GLint model_loc;
 	GLint proj_loc;
 	GLint view_loc;
+	GLint tex_loc;
 } shader_t;
 
 /*

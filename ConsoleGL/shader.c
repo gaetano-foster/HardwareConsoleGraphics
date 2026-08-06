@@ -100,6 +100,7 @@ shader_compile(shader_t *shader,
 	EXPECT((shader->model_loc = glGetUniformLocation(shader->id, "model")) != -1);
 	EXPECT((shader->proj_loc = glGetUniformLocation(shader->id, "proj")) != -1);
 	EXPECT((shader->view_loc = glGetUniformLocation(shader->id, "view")) != -1);
+	EXPECT((shader->tex_loc = glGetUniformLocation(shader->id, "tex")) != -1);
 	// clean up
 	glDeleteShader(vertex_shader);
 	glDeleteShader(fragment_shader); 
