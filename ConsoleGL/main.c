@@ -35,7 +35,7 @@ struct {
 		INT32 tps;
 		INT32 fps;
 	} loop;
-	object_t teapot;
+	object_t cube;
 } state;
 
 void
@@ -102,14 +102,13 @@ init()
 	// initialize screen and opengl context
 	EXPECT(context_init(S_WIDTH, S_HEIGHT));
 	EXPECT(conscr_init());
-	render_target_init(S_WIDTH, S_HEIGHT);
 	// build teapot object
-	EXPECT(state.teapot.shader = malloc(sizeof(shader_t)));
-	EXPECT(state.teapot.mesh = malloc(sizeof(mesh_t)));
-	EXPECT(shader_compile(state.teapot.shader, "vert.glsl", "frag.glsl"));
-	EXPECT(mesh_load(state.teapot.mesh, "teapot.obj"));
-	object_init(&state.teapot);
-	object_setpos(&state.teapot, (vec3) { 0.0f, 0.0f, -1.0f });
+	EXPECT(state.cube.shader = malloc(sizeof(shader_t)));
+	EXPECT(state.cube.mesh = malloc(sizeof(mesh_t)));
+	EXPECT(shader_compile(state.cube.shader, "vert.glsl", "frag.glsl"));
+	EXPECT(mesh_load(state.cube.mesh, "cube.obj"));
+	object_init(&state.cube);
+	object_setpos(&state.cube, (vec3) { 0.0f, 0.0f, -1.0f });
 	// configure camera
 	struct camera_config_t config = {
 		.x = -0.5,
@@ -147,14 +146,12 @@ tick()
 void
 render()
 {
-	conscr_sethud(""); // reset hud between frames
 	render_target_bind();
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	object_draw(&state.teapot);
+	object_draw(&state.cube);
 	conscr_render();
-	CONSCR_HUD_CAT("FPS: %d               \n", state.loop.fps);
-	CONSCR_HUD_CAT("TPS: %d               \n", state.loop.tps);
+	CONSCR_HUD_FMT("FPS: %d", state.loop.fps);
 	conscr_renderhud();
 	context_swap();
 }
@@ -200,13 +197,12 @@ run()
 void
 cleanup()
 {
-	mesh_destroy(*state.teapot.mesh);
-	shader_destroy(*state.teapot.shader);
-	free(state.teapot.shader);
-	free(state.teapot.mesh);
+	mesh_destroy(*state.cube.mesh);
+	shader_destroy(*state.cube.shader);
+	free(state.cube.shader);
+	free(state.cube.mesh);
 	context_destroy();
 	conscr_destroy();
-	render_target_cleanup();
 }
 
 int
