@@ -82,8 +82,8 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="vert.glsl" />
-    <None Include="frag.glsl" />
+    <None Include="block.vs" />
+    <None Include="block.fs" />
     <None Include="teapot.obj">
       <Filter>Resource Files</Filter>
     </None>
