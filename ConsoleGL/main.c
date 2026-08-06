@@ -9,6 +9,7 @@
 #include "conscr.h"
 #include "context.h"
 #include "shader.h"
+#include "texture.h"
 #include "object.h"
 #include "camera.h"
 #include "render_target.h"
@@ -105,8 +106,10 @@ init()
 	// build teapot object
 	EXPECT(state.cube.shader = malloc(sizeof(shader_t)));
 	EXPECT(state.cube.mesh = malloc(sizeof(mesh_t)));
-	EXPECT(shader_compile(state.cube.shader, "vert.glsl", "frag.glsl"));
+	EXPECT(state.cube.texture = malloc(sizeof(texture_t)));
+	EXPECT(shader_compile(state.cube.shader, "block.vs", "block.fs"));
 	EXPECT(mesh_load(state.cube.mesh, "cube.obj"));
+	EXPECT(texture_load(state.cube.texture, "grass.jpg"));
 	object_init(&state.cube);
 	object_setpos(&state.cube, (vec3) { 0.0f, 0.0f, -1.0f });
 	// configure camera
@@ -199,8 +202,10 @@ cleanup()
 {
 	mesh_destroy(*state.cube.mesh);
 	shader_destroy(*state.cube.shader);
+	texture_destroy(*state.cube.texture);
 	free(state.cube.shader);
 	free(state.cube.mesh);
+	free(state.cube.texture);
 	context_destroy();
 	conscr_destroy();
 }
