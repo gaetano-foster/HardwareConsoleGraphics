@@ -4,6 +4,7 @@
 #include <Windows.h>
 #include "conscr.h"
 #include "render_target.h"
+#include "config.h"
 
 static struct _conscr_t {
 	// HUD
@@ -28,8 +29,8 @@ resize_console(HANDLE console_handle)
 	cfi.cbSize = sizeof(CONSOLE_FONT_INFOEX);
 	GetCurrentConsoleFontEx(console_handle, FALSE, &cfi);
 	// fix dimensions
-	cfi.dwFontSize.X = FONT_SIZE; 
-	cfi.dwFontSize.Y = FONT_SIZE; 
+	cfi.dwFontSize.X = FONT_W; 
+	cfi.dwFontSize.Y = FONT_H; 
 	// must be populated to force non-zero dimensions
 	cfi.FontFamily = FF_MODERN; // TrueType monospaced flag
 	cfi.FontWeight = FW_NORMAL; // Weight integer
@@ -41,6 +42,70 @@ resize_console(HANDLE console_handle)
 	// resize window
 	SetConsoleScreenBufferSize(console_handle, (COORD) { S_WIDTH, S_HEIGHT });
 	SetConsoleWindowInfo(console_handle, TRUE, &(SMALL_RECT) { 0, 0, S_WIDTH - 1, S_HEIGHT - 1 });
+}
+
+static unsigned int
+itos(unsigned int i, char *buf)
+{
+	int n = 0;
+	unsigned int temp = i;
+
+	do {
+		n++;
+		temp /= 10;
+	} while (temp > 0);
+
+	int idx = n - 1;
+	do {
+		buf[idx--] = (i % 10) + '0';
+		i /= 10;
+	} while (i > 0);
+
+	return n;
+}
+
+static int tc_prev_r, tc_prev_g, tc_prev_b; // cached color values
+
+static inline size_t
+append_color(char *p, 
+	GLuint r, GLuint g, GLuint b)
+{
+	char *t = p; // save original pointer spot
+	// throw away least significant bits for imperceptibly close colors
+	r &= TC_COLOR_MASK;
+	g &= TC_COLOR_MASK;
+	b &= TC_COLOR_MASK;
+
+	if (tc_prev_r == r
+		&& tc_prev_g == g
+		&& tc_prev_b == b) {
+		goto block;
+	}
+
+	*p++ = '\x1b';
+	*p++ = '[';
+	*p++ = '3';
+	*p++ = '8';
+	*p++ = ';';
+	*p++ = '2';
+	*p++ = ';';
+	p += itos(r, p);
+	*p++ = ';';
+	p += itos(g, p);
+	*p++ = ';';
+	p += itos(b, p);
+	*p++ = 'm';
+block:
+	*p++ = (char)0xE2; // for the block character
+	*p++ = (char)0x96;
+	*p++ = (char)0x88;
+
+	// update cached color
+	tc_prev_r = r;
+	tc_prev_g = g;
+	tc_prev_b = b;
+
+	return p - t;
 }
 
 BOOL
@@ -92,7 +157,7 @@ conscr_init()
 	return TRUE;
 }
 
-void
+static void
 conscr_renderci()
 {
 	// write frame buffer data to screen buffer
@@ -122,72 +187,8 @@ conscr_renderci()
 		&write_region);
 }
 
-static unsigned int
-itos(unsigned int i, char *buf)
-{
-	int n = 0;
-	unsigned int temp = i;
-
-	do {
-		n++;
-		temp /= 10;
-	} while (temp > 0);
-
-	int idx = n - 1;
-	do {
-		buf[idx--] = (i % 10) + '0';
-		i /= 10;
-	} while (i > 0);
-
-	return n;
-}
-
-static int tc_prev_r, tc_prev_g, tc_prev_b; // cached color values
-
-static inline size_t
-append_color(char *p, 
-	GLuint r, GLuint g, GLuint b)
-{
-	char *t = p; // save original pointer spot
-	// throw away least significant bits for imperceptibly close colors
-	r &= TC_COLOR_MASK;
-	g &= TC_COLOR_MASK;
-	b &= TC_COLOR_MASK;
-	
-	if (tc_prev_r == r
-		&& tc_prev_g == g
-		&& tc_prev_b == b) {
-		goto block;
-	}
-
-	*p++ = '\x1b';
-	*p++ = '[';
-	*p++ = '3';
-	*p++ = '8';
-	*p++ = ';';
-	*p++ = '2';
-	*p++ = ';';
-	p += itos(r, p);
-	*p++ = ';';
-	p += itos(g, p);
-	*p++ = ';';
-	p += itos(b, p);
-	*p++ = 'm';
-block:
-	*p++ = (char)0xE2; // for the block character
-	*p++ = (char)0x96;
-	*p++ = (char)0x88;
-
-	// update cached color
-	tc_prev_r = r;
-	tc_prev_g = g;
-	tc_prev_b = b;
-
-	return p - t;
-}
-
-void
-conscr_render()
+static void
+conscr_rendertc()
 {
 	// write frame buffer data to screen buffer
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
@@ -227,14 +228,16 @@ conscr_render()
 }
 
 void
-conscr_destroy()
+conscr_render()
 {
-	SetConsoleActiveScreenBuffer(conscr.original);
-	CloseHandle(conscr.console_handle);
-	free(conscr.pixel_buffer);
-	free(conscr.frame_buffer);
-	free(conscr.ci_buffer);
-	render_target_cleanup();
+	switch (CONSCR_MODE) {
+	case CMD_RENDER_TC:
+		conscr_rendertc();
+		break;
+	case CMD_RENDER_CI:
+		conscr_renderci();
+		break;
+	}
 }
 
 void
@@ -249,8 +252,8 @@ conscr_hud()
 	return conscr.hud_message;
 }
 
-void
-conscr_renderhud() 
+static void
+conscr_rendertchud() 
 {
 	char message[HUD_MAX_LEN + 20] = "\x1b[38;2;255;255;255m";
 	strcat(message, conscr.hud_message);
@@ -272,7 +275,7 @@ conscr_renderhud()
 	tc_prev_b = 255;
 }
 
-void
+static void
 conscr_rendercihud() 
 {
 	SetConsoleCursorPosition(
@@ -288,14 +291,39 @@ conscr_rendercihud()
 	);
 }
 
+void
+conscr_renderhud()
+{
+	if (!HUD_ENABLED) return;
+
+	switch (CONSCR_MODE) {
+	case CMD_RENDER_TC:
+		conscr_rendertchud();
+		break;
+	case CMD_RENDER_CI:
+		conscr_rendercihud();
+		break;
+	}
+}
+
+void
+conscr_destroy()
+{
+	SetConsoleActiveScreenBuffer(conscr.original);
+	CloseHandle(conscr.console_handle);
+	free(conscr.pixel_buffer);
+	free(conscr.frame_buffer);
+	free(conscr.ci_buffer);
+	render_target_cleanup();
+}
+
 // TODO: Use lookup table and match colors to nearest instead for better fidelity
 CHAR_INFO 
 bgr_to_ascii(struct bgr_t bgr) 
 {
 	const int MAX_BRIGHTNESS = 255;
 	// darkest to lightest characters
-	static const WCHAR *palette = L".,:-=+*#%@";
-	const size_t palette_length = wcslen(palette);
+	const size_t palette_length = wcslen(CI_PALETTE);
 	double brightness = 
 		0.0722 * bgr.b + 
 		0.7152 * bgr.g + 
@@ -306,13 +334,13 @@ bgr_to_ascii(struct bgr_t bgr)
 	// threshold colors into attribute colors
 	WORD attr = 0;
 
-	if (bgr.b > 140) attr |= FOREGROUND_BLUE;
-	if (bgr.g > 128) attr |= FOREGROUND_GREEN;
-	if (bgr.r > 110) attr |= FOREGROUND_RED;
-	if ((brightness) > 216) attr |= FOREGROUND_INTENSITY;
+	if (bgr.b > CI_THR_B) attr |= FOREGROUND_BLUE;
+	if (bgr.g > CI_THR_G) attr |= FOREGROUND_GREEN;
+	if (bgr.r > CI_THR_R) attr |= FOREGROUND_RED;
+	if ((brightness) > CI_THR_I) attr |= FOREGROUND_INTENSITY;
 
 	return (CHAR_INFO) {
-		.Char.UnicodeChar = palette[index],
+		.Char.AsciiChar = CI_PALETTE[index],
 		.Attributes = attr
 	};
 }
