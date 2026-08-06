@@ -13,6 +13,7 @@ typedef struct _object_t {
 	mat4 transform;
 	mesh_t *mesh;
 	shader_t *shader;
+	texture_t *texture;
 } object_t;
 
 /* 
