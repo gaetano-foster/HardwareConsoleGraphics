@@ -15,85 +15,74 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.c">
+    <ClCompile Include="src\camera.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\libs\glad-3.3\src\glad.c">
+    <ClCompile Include="src\conscr.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="mesh.c">
+    <ClCompile Include="src\context.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="conscr.c">
+    <ClCompile Include="src\main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="shader.c">
+    <ClCompile Include="src\mesh.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="object.c">
+    <ClCompile Include="src\object.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="context.c">
+    <ClCompile Include="src\render_target.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="camera.c">
+    <ClCompile Include="src\shader.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="render_target.c">
+    <ClCompile Include="dep\src\stb_image.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="stb_image.c">
+    <ClCompile Include="src\texture.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="texture.c">
+    <ClCompile Include="dep\src\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="mesh.h">
+    <ClInclude Include="include\camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="conscr.h">
+    <ClInclude Include="include\conscr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="shader.h">
+    <ClInclude Include="include\context.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="object.h">
+    <ClInclude Include="include\mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="context.h">
+    <ClInclude Include="include\object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="camera.h">
+    <ClInclude Include="include\render_target.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="utils.h">
+    <ClInclude Include="include\shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="render_target.h">
+    <ClInclude Include="include\stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="stb_image.h">
+    <ClInclude Include="include\texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="texture.h">
+    <ClInclude Include="include\utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="block.vs" />
-    <None Include="block.fs" />
-    <None Include="teapot.obj">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="cube.obj">
-      <Filter>Resource Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="grass.jpg">
-      <Filter>Resource Files</Filter>
-    </Image>
+    <None Include="src\block.fs" />
+    <None Include="src\block.vs" />
   </ItemGroup>
 </Project>

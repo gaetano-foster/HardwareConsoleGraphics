@@ -70,6 +70,14 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(SolutionDir)\ConsoleGL\include</IncludePath>
+    <SourcePath>$(SolutionDir)\ConsoleGL\src;$(SolutionDir)\ConsoleGL\dep\src;C:\Users\gaeta\OneDrive\Documents\dev\projects\ConsoleGL\ConsoleGL\src;$(SourcePath)</SourcePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(SolutionDir)\ConsoleGL\include</IncludePath>
+    <SourcePath>$(SolutionDir)\ConsoleGL\src;$(SolutionDir)\ConsoleGL\dep\src;$(VC_SourcePath);</SourcePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -104,13 +112,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\gaeta\OneDrive\Documents\dev\libs\assimp\include;C:\Users\gaeta\OneDrive\Documents\dev\libs\glm\cglm\include;C:\Users\gaeta\OneDrive\Documents\dev\libs\SDL2\include;C:\Users\gaeta\OneDrive\Documents\dev\libs\glad-3.3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\ConsoleGL\dep\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\gaeta\OneDrive\Documents\dev\libs\SDL2\lib\x64;C:\Users\gaeta\OneDrive\Documents\dev\libs\assimp\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\ConsoleGL\dep\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>assimp-vc143-mtd.lib;SDL2.lib;SDL2main.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -122,60 +130,44 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\gaeta\OneDrive\Documents\dev\libs\assimp\include;C:\Users\gaeta\OneDrive\Documents\dev\libs\glm\cglm\include;C:\Users\gaeta\OneDrive\Documents\dev\libs\SDL2\include;C:\Users\gaeta\OneDrive\Documents\dev\libs\glad-3.3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\ConsoleGL\dep\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 /Ox %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\gaeta\OneDrive\Documents\dev\libs\SDL2\lib\x64;C:\Users\gaeta\OneDrive\Documents\dev\libs\assimp\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\ConsoleGL\dep\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>assimp-vc143-mt.lib;SDL2.lib;SDL2main.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\libs\glad-3.3\src\glad.c" />
-    <ClCompile Include="camera.c" />
-    <ClCompile Include="conscr.c" />
-    <ClCompile Include="context.c" />
-    <ClCompile Include="main.c" />
-    <ClCompile Include="mesh.c" />
-    <ClCompile Include="object.c" />
-    <ClCompile Include="render_target.c" />
-    <ClCompile Include="shader.c" />
-    <ClCompile Include="stb_image.c" />
-    <ClCompile Include="texture.c" />
+    <ClCompile Include="dep\src\glad.c" />
+    <ClCompile Include="src\camera.c" />
+    <ClCompile Include="src\conscr.c" />
+    <ClCompile Include="src\context.c" />
+    <ClCompile Include="src\main.c" />
+    <ClCompile Include="src\mesh.c" />
+    <ClCompile Include="src\object.c" />
+    <ClCompile Include="src\render_target.c" />
+    <ClCompile Include="src\shader.c" />
+    <ClCompile Include="dep\src\stb_image.c" />
+    <ClCompile Include="src\texture.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="camera.h" />
-    <ClInclude Include="conscr.h" />
-    <ClInclude Include="context.h" />
-    <ClInclude Include="render_target.h" />
-    <ClInclude Include="stb_image.h" />
-    <ClInclude Include="texture.h" />
-    <ClInclude Include="utils.h" />
-    <ClInclude Include="mesh.h" />
-    <ClInclude Include="object.h" />
-    <ClInclude Include="shader.h" />
+    <ClInclude Include="include\camera.h" />
+    <ClInclude Include="include\conscr.h" />
+    <ClInclude Include="include\context.h" />
+    <ClInclude Include="include\mesh.h" />
+    <ClInclude Include="include\object.h" />
+    <ClInclude Include="include\render_target.h" />
+    <ClInclude Include="include\shader.h" />
+    <ClInclude Include="include\stb_image.h" />
+    <ClInclude Include="include\texture.h" />
+    <ClInclude Include="include\utils.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="block.fs" />
-    <None Include="block.vs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="teapot.obj">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="cube.obj">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="grass.jpg" />
+    <None Include="src\block.fs" />
+    <None Include="src\block.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
