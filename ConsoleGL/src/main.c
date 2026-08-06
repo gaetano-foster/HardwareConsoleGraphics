@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include <cglm/cglm.h>
 #include "utils.h"
+#include "config.h"
 #include "mesh.h"
 #include "conscr.h"
 #include "context.h"
@@ -42,7 +43,7 @@ struct {
 	object_t cube;
 } state;
 
-void
+static void
 capture_input()
 {
 	// use GetAsyncKeyState for input instead of built in SDL inputs
@@ -60,7 +61,7 @@ capture_input()
 	state.keys.ESC = GetAsyncKeyState(VK_ESCAPE) & 0x8000;
 }
 
-void
+static void
 move_camera()
 {
 	vec3 cam_angle;
@@ -100,9 +101,11 @@ move_camera()
 	if (pitch < glm_rad(-89.9)) camera_setrot_rad((vec3) { glm_rad(-89.9), yaw, roll });
 }
 
-void
+static void
 init()
 {
+	// Get constants from configuration script
+	EXPECT(configure("cmd_render.cfg"));
 	// initialize screen and opengl context
 	EXPECT(context_init(S_WIDTH, S_HEIGHT));
 	EXPECT(conscr_init());
@@ -140,7 +143,7 @@ init()
 	state.loop.tps = state.loop.target_tps;
 }
 
-void
+static void
 tick()
 {
 	capture_input();
@@ -149,7 +152,7 @@ tick()
 	if (state.keys.ESC) state.loop.running = FALSE;
 }
 
-void
+static void
 render()
 {
 	render_target_bind();
@@ -162,7 +165,7 @@ render()
 	context_swap();
 }
 
-void
+static void
 run()
 {
 	state.loop.running = TRUE;
