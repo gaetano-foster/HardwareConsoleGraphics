@@ -3,7 +3,7 @@
 #include <glad/glad.h>
 #include <Windows.h>
 #include "conscr.h"
-#include "utils.h"
+#include "render_target.h"
 
 static struct _conscr_t {
 	// HUD
@@ -23,17 +23,22 @@ static struct _conscr_t {
 static void
 resize_console(HANDLE console_handle)
 {
-	// TODO: Make font, font size, and window dimensions configurable
 	// change font size
 	CONSOLE_FONT_INFOEX cfi;
 	cfi.cbSize = sizeof(CONSOLE_FONT_INFOEX);
 	GetCurrentConsoleFontEx(console_handle, FALSE, &cfi);
-	cfi.dwFontSize.X = 0; // system auto calculates width
-	cfi.dwFontSize.Y = FONT_SIZE; // new font height in pixels
+	// fix dimensions
+	cfi.dwFontSize.X = FONT_SIZE; 
+	cfi.dwFontSize.Y = FONT_SIZE; 
+	// must be populated to force non-zero dimensions
+	cfi.FontFamily = FF_MODERN; // TrueType monospaced flag
+	cfi.FontWeight = FW_NORMAL; // Weight integer
+	// set font to consolas
 	wcscpy_s(cfi.FaceName, LF_FACESIZE, L"Consolas");
 	SetCurrentConsoleFontEx(console_handle, FALSE, &cfi);
-
-	// set screen buffer size & physical window rect size
+	// force physical window down to 1x1 first
+	SetConsoleWindowInfo(console_handle, TRUE, &(SMALL_RECT) { 0, 0, 0, 0 });
+	// resize window
 	SetConsoleScreenBufferSize(console_handle, (COORD) { S_WIDTH, S_HEIGHT });
 	SetConsoleWindowInfo(console_handle, TRUE, &(SMALL_RECT) { 0, 0, S_WIDTH - 1, S_HEIGHT - 1 });
 }
@@ -83,6 +88,7 @@ conscr_init()
 
 	SetConsoleActiveScreenBuffer(conscr.console_handle);
 	resize_console(conscr.console_handle);
+	render_target_init(S_WIDTH, S_HEIGHT);
 	return TRUE;
 }
 
@@ -100,7 +106,6 @@ conscr_renderci()
 		conscr.pixel_buffer);
 
 	struct bgr_t *buf = (struct bgr_t *)(conscr.pixel_buffer);
-	// TODO: find better way of doing this
 	for (int y = 0; y < S_HEIGHT; y++) {
 		for (int x = 0; x < S_WIDTH; x++) {
 			conscr.ci_buffer[y * S_WIDTH + x] = bgr_to_ascii(buf[(y * S_WIDTH + x)]);
@@ -229,6 +234,7 @@ conscr_destroy()
 	free(conscr.pixel_buffer);
 	free(conscr.frame_buffer);
 	free(conscr.ci_buffer);
+	render_target_cleanup();
 }
 
 void

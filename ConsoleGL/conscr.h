@@ -1,11 +1,11 @@
 ﻿#ifndef __CONSOLE_SCREEN__
 #define __CONSOLE_SCREEN__
 
-#define S_WIDTH				(120)
+#define S_WIDTH				(60)
 #define S_HEIGHT			(40)
 #define FONT_SIZE			(16)		
 #define CELL_MAX_BYTES		(32)
-#define TC_COLOR_MASK		(0xF0) // 0b11110000
+#define TC_COLOR_MASK		(0xF0) // default: 0b11110000 aka 0xF0
 #define HUD_MAX_LEN			(256)
 
 #define CONSCR_HUD_FMT(FMT, ...) \
