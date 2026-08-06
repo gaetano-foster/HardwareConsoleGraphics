@@ -143,13 +143,11 @@ mesh_load(mesh_t *mesh,
 
         vertex_offset += ai_mesh->mNumVertices;
     }
-
     mesh_build(mesh, vertices, indices, vsize, isize);
 
     free(vertices);
     free(indices);
     aiReleaseImport(scene);
-
     return TRUE;
 }
 
