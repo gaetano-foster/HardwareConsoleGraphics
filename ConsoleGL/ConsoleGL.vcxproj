@@ -142,12 +142,16 @@
     <ClCompile Include="object.c" />
     <ClCompile Include="render_target.c" />
     <ClCompile Include="shader.c" />
+    <ClCompile Include="stb_image.c" />
+    <ClCompile Include="texture.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
     <ClInclude Include="conscr.h" />
     <ClInclude Include="context.h" />
     <ClInclude Include="render_target.h" />
+    <ClInclude Include="stb_image.h" />
+    <ClInclude Include="texture.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="object.h" />
@@ -169,6 +173,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <FileType>Document</FileType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="grass.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
