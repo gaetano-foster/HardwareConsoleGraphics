@@ -29,6 +29,10 @@ typedef struct _vertex_t {
 
 /*
 Reads in mesh from file at specified path
+
+Return Values:
+	- FALSE (0): Indicates failure
+	- TRUE	(1): Indicates success
 */
 BOOL
 mesh_load(mesh_t *mesh, 

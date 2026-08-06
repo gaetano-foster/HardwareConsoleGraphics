@@ -11,6 +11,9 @@ typedef struct _texture_t {
 /*
 Loads in a texture from the specified file path
 
+Return Values:
+	- FALSE (0): Indicates failure
+	- TRUE	(1): Indicates success
 */
 BOOL
 texture_load(texture_t *tex,
