@@ -27,8 +27,8 @@ Return Values:
 */
 BOOL
 shader_compile(shader_t *shader,
-	const char *vert_path, 
-	const char *frag_path);
+	const char *vert_source, 
+	const char *frag_source);
 
 /*
 Frees memory associated with shader
