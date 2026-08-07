@@ -7,11 +7,14 @@
 #include "utils.h"
 #include "camera.h"
 
-BOOL
-shader_compile(shader_t *shader,
-	const char *vert_source,
-	const char *frag_source)
+shader_t *
+shader_compile(const char *vert_source, const char *frag_source)
 {
+	shader_t *shader;
+	if (!(shader = malloc(sizeof(shader_t)))) {
+		fprintf(stderr, "Failed to allocate memory for mesh.");
+		return NULL;
+	}
 	// compile vertex shadder
 	GLuint vertex_shader;
 	vertex_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -30,14 +33,16 @@ shader_compile(shader_t *shader,
 	if(!success) {
 		glGetShaderInfoLog(vertex_shader, 512, NULL, info_log);
 		fprintf(stderr, "Error: Vertex Shader Compilation failed!\n%s", info_log);
-		return FALSE;
+		free(shader);
+		return NULL;
 	}
 
 	glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &success);
 	if(!success) {
 		glGetShaderInfoLog(fragment_shader, 512, NULL, info_log);
 		fprintf(stderr, "Error: Fragment Shader Compilation failed!\n%s", info_log);
-		return FALSE;
+		free(shader);
+		return NULL;
 	}
 	// link shader program
 	shader->id = glCreateProgram();
@@ -45,24 +50,29 @@ shader_compile(shader_t *shader,
 	glAttachShader(shader->id, fragment_shader);
 	glLinkProgram(shader->id);
 	// populate uniform values
-	EXPECT((shader->model_loc = glGetUniformLocation(shader->id, "model")) != -1);
-	EXPECT((shader->proj_loc = glGetUniformLocation(shader->id, "proj")) != -1);
-	EXPECT((shader->view_loc = glGetUniformLocation(shader->id, "view")) != -1);
-	EXPECT((shader->tex_loc = glGetUniformLocation(shader->id, "tex")) != -1);
+	if (!((shader->model_loc = glGetUniformLocation(shader->id, "model")) != -1)
+		|| (!((shader->proj_loc = glGetUniformLocation(shader->id, "proj")) != -1))
+		|| (!((shader->view_loc = glGetUniformLocation(shader->id, "view")) != -1))
+		|| (!((shader->tex_loc = glGetUniformLocation(shader->id, "tex")) != -1))) {
+		fprintf(stderr, "Error: Uniform variable not found!\n");
+		free(shader);
+		return NULL;
+	}
 	// clean up
 	glDeleteShader(vertex_shader);
 	glDeleteShader(fragment_shader); 
-	return TRUE;
+	return shader;
 }
 
 void
-shader_destroy(shader_t shader)
+shader_cleanup(shader_t *shader)
 {
-	glDeleteProgram(shader.id);
+	glDeleteProgram(shader->id);
+	free(shader);
 }
 
 void
-shader_use(shader_t shader)
+shader_use(shader_t *shader)
 {
-	glUseProgram(shader.id);
+	glUseProgram(shader->id);
 }

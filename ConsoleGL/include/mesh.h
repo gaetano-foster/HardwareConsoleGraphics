@@ -28,26 +28,22 @@ typedef struct _vertex_t {
 } vertex_t;
 
 /*
-Reads in mesh from file at specified path
-
-Return Values:
-	- FALSE (0): Indicates failure
-	- TRUE	(1): Indicates success
+Returns heap allocated pointer to mesh read in from file at path
+that must be freed with mesh_cleanup
 */
-BOOL
-mesh_load(mesh_t *mesh, 
-	const char *path);
+mesh_t *
+mesh_load(const char *path);
 
 /*
 Frees memory associated with mesh
 */
 void
-mesh_destroy(mesh_t mesh);
+mesh_cleanup(mesh_t *mesh);
 
 /*
 Draws the mesh to the OpenGL frame buffer
 */
 void
-mesh_draw(mesh_t mesh);
+mesh_draw(mesh_t *mesh);
 
 #endif // !__MESH_H__

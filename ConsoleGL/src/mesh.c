@@ -63,12 +63,13 @@ mesh_build(mesh_t *mesh,
 	mesh->element_count = isize / sizeof(GLuint);
 }
 
-BOOL
-mesh_load(mesh_t *mesh,
-	const char *path)
+mesh_t *
+mesh_load(const char *path)
 {
-    if (!mesh || !path) {
-        return FALSE;
+    mesh_t *mesh;
+    if (!(mesh = malloc(sizeof(mesh_t)))) {
+        fprintf(stderr, "Failed to allocate memory for mesh.");
+        return NULL;
     }
 
     const struct aiScene *scene = aiImportFile(path, 
@@ -77,10 +78,10 @@ mesh_load(mesh_t *mesh,
         aiProcess_GenSmoothNormals |      
         aiProcess_FlipUVs                 
     );
-
     if (!scene || !scene->mRootNode) {
-        fprintf(stderr, "[Mesh Error] Assimp failed to load '%s': %s\n", path, aiGetErrorString());
-        return FALSE;
+        fprintf(stderr, "Assimp failed to load '%s': %s\n", path, aiGetErrorString());
+        free(mesh);
+        return NULL;
     }
 
     unsigned int total_vertices = 0;
@@ -100,7 +101,8 @@ mesh_load(mesh_t *mesh,
         free(vertices);
         free(indices);
         aiReleaseImport(scene);
-        return FALSE;
+        free(mesh);
+        return NULL;
     }
 
     unsigned int vertex_offset = 0;
@@ -144,24 +146,24 @@ mesh_load(mesh_t *mesh,
         vertex_offset += ai_mesh->mNumVertices;
     }
     mesh_build(mesh, vertices, indices, vsize, isize);
-
     free(vertices);
     free(indices);
     aiReleaseImport(scene);
-    return TRUE;
+    return mesh;
 }
 
 void
-mesh_draw(mesh_t mesh)
+mesh_draw(mesh_t *mesh)
 {
-	glBindVertexArray(mesh.vao);
-	glDrawElements(GL_TRIANGLES, mesh.element_count, GL_UNSIGNED_INT, NULL);
+	glBindVertexArray(mesh->vao);
+	glDrawElements(GL_TRIANGLES, mesh->element_count, GL_UNSIGNED_INT, NULL);
 }
 
 void 
-mesh_destroy(mesh_t mesh)
+mesh_cleanup(mesh_t *mesh)
 {
-	glDeleteVertexArrays(1, &mesh.vao);
-	glDeleteBuffers(1, &mesh.vbo);
-	glDeleteBuffers(1, &mesh.ebo);
+	glDeleteVertexArrays(1, &mesh->vao);
+	glDeleteBuffers(1, &mesh->vbo);
+	glDeleteBuffers(1, &mesh->ebo);
+    free(mesh);
 }

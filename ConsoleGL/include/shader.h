@@ -14,32 +14,26 @@ typedef struct _shader_t {
 } shader_t;
 
 /*
-Compiles a shader program
+Returns heap allocated pointer to shader compiled
+that must be freed with shader_cleanup
 
 Parameters:
-	- shader_t *shader: shader program structure to be populated
-	- const char *vert_path: path to vertex shader file
-	- const char *frag_path: path to fragment shader file
-
-Return Values:
-	- FALSE (0): Indicates failure
-	- TRUE	(1): Indicates success
+	- const char *vert_source: source code for vertex shader
+	- const char *frag_source: source code for fragment shader
 */
-BOOL
-shader_compile(shader_t *shader,
-	const char *vert_source, 
-	const char *frag_source);
+shader_t *
+shader_compile(const char *vert_source, const char *frag_source);
 
 /*
 Frees memory associated with shader
 */
 void
-shader_destroy(shader_t shader);
+shader_cleanup(shader_t *shader);
 
 /*
 Tells OpenGL context to use shader
 */
 void
-shader_use(shader_t shader);
+shader_use(shader_t *shader);
 
 #endif
