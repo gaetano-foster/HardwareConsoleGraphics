@@ -5,6 +5,7 @@
 #include "conscr.h"
 #include "render_target.h"
 #include "config.h"
+#include "context.h"
 
 static struct _conscr_t {
 	// HUD
@@ -111,6 +112,7 @@ block:
 BOOL
 conscr_init()
 {
+	if (!context_init()) return FALSE;
 	// store original screen
 	conscr.original = GetStdHandle(STD_OUTPUT_HANDLE);
 
@@ -155,6 +157,12 @@ conscr_init()
 	resize_console(conscr.console_handle);
 	render_target_init(S_WIDTH, S_HEIGHT);
 	return TRUE;
+}
+
+void
+conscr_swap()
+{
+	context_swap();
 }
 
 static void
@@ -314,6 +322,7 @@ conscr_destroy()
 	free(conscr.pixel_buffer);
 	free(conscr.frame_buffer);
 	free(conscr.ci_buffer);
+	context_destroy();
 	render_target_cleanup();
 }
 

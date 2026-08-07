@@ -39,6 +39,12 @@ BOOL
 conscr_init();
 
 /*
+Wrapper around context_init()
+*/
+void
+conscr_swap();
+
+/*
 Reads pixels from render_target framebuffer and
 writes them to the console screen
 */
