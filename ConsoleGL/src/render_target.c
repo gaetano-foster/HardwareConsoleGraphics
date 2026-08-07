@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "utils.h"
 #include "render_target.h"
+#include "config.h"
 
 static struct {
 	GLuint fbo;
@@ -12,10 +13,10 @@ static struct {
 } target;
 
 void
-render_target_init(int width, int height)
+render_target_init()
 {
-	target.width = width;
-	target.height = height;
+	target.width = S_WIDTH;
+	target.height = S_HEIGHT;
 	// generate frame buffer
 	glGenFramebuffers(1, &target.fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, target.fbo);
@@ -26,8 +27,8 @@ render_target_init(int width, int height)
 		GL_TEXTURE_2D,
 		0,
 		GL_RGB,
-		width,
-		height,
+		S_WIDTH,
+		S_HEIGHT,
 		0,
 		GL_RGB,
 		GL_UNSIGNED_BYTE,
@@ -46,8 +47,8 @@ render_target_init(int width, int height)
 	glRenderbufferStorage(
 		GL_RENDERBUFFER,
 		GL_DEPTH24_STENCIL8,
-		width,
-		height);
+		S_WIDTH,
+		S_HEIGHT);
 	glFramebufferRenderbuffer(
 		GL_FRAMEBUFFER,
 		GL_DEPTH_STENCIL_ATTACHMENT,

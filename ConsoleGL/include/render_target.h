@@ -5,7 +5,7 @@
 Initializes the render target
 */
 void
-render_target_init(int width, int height);
+render_target_init();
 
 /*
 Binds the render target's framebuffer
