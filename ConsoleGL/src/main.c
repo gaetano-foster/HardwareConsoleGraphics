@@ -50,9 +50,9 @@ capture_input()
 	// get relative mouse position
 	POINT mouse_pos;
 	GetCursorPos(&mouse_pos);
-	state.input.mouse_move.x =  mouse_pos.x - 100;
-	state.input.mouse_move.y =  mouse_pos.y - 100;
-	SetCursorPos(100, 100);
+	state.input.mouse_move.x =  mouse_pos.x - 500;
+	state.input.mouse_move.y =  mouse_pos.y - 500;
+	SetCursorPos(500, 500);
 	// get keyboard input
 	state.input.W = GetAsyncKeyState('W') & 0x8000;
 	state.input.A = GetAsyncKeyState('A') & 0x8000;
@@ -105,18 +105,12 @@ move_camera()
 static void
 init()
 {
-	// Get constants from configuration script
 	EXPECT(configure("cmd_render.cfg"));
-	// initialize screen and opengl context
-	EXPECT(context_init(S_WIDTH, S_HEIGHT));
 	EXPECT(conscr_init());
 	// build teapot object
-	EXPECT(state.cube.shader = malloc(sizeof(shader_t)));
-	EXPECT(state.cube.mesh = malloc(sizeof(mesh_t)));
-	EXPECT(state.cube.texture = malloc(sizeof(texture_t)));
-	EXPECT(shader_compile(state.cube.shader, block_vs, block_fs));
-	EXPECT(mesh_load(state.cube.mesh, "res/cube.obj"));
-	EXPECT(texture_load(state.cube.texture, "res/grass.jpg"));
+	EXPECT(state.cube.shader = shader_compile(block_vs, block_fs));
+	EXPECT(state.cube.mesh = mesh_load("res/cube.obj"));
+	EXPECT(state.cube.texture = texture_load("res/grass.jpg"));
 	object_init(&state.cube);
 	object_setpos(&state.cube, (vec3) { 0.0f, 0.0f, -1.0f });
 	// configure camera
@@ -157,13 +151,15 @@ static void
 render()
 {
 	render_target_bind();
+	// draw
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	object_draw(&state.cube);
 	conscr_render();
 	CONSCR_HUD_FMT("FPS: %d", state.loop.fps);
 	conscr_renderhud();
-	context_swap();
+	// swap buffers
+	conscr_swap();
 }
 
 static void
@@ -209,13 +205,9 @@ run()
 void
 cleanup()
 {
-	mesh_destroy(*state.cube.mesh);
-	shader_destroy(*state.cube.shader);
-	texture_destroy(*state.cube.texture);
-	free(state.cube.shader);
-	free(state.cube.mesh);
-	free(state.cube.texture);
-	context_destroy();
+	mesh_cleanup(state.cube.mesh);
+	shader_cleanup(state.cube.shader);
+	texture_cleanup(state.cube.texture);
 	conscr_destroy();
 }
 
