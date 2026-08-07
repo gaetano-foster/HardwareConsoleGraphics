@@ -13,7 +13,7 @@ Return Value:
 	- TRUE	(1): Indicates success
 */
 BOOL
-context_init(int width, int height);
+context_init();
 
 /*
 Frees memory allocated by context_init and calls SDL_Quit
