@@ -19,12 +19,13 @@
 #include "block.fs.h"
 
 #define SPEED		(5)
-#define SENS		(5)
+#define SENS		(.5f)
 
 struct {
 	struct {
 		BOOL W, A, S, D, SPACE, LSHIFT, UP, DOWN, LEFT, RIGHT, ESC;
-	} keys;
+		POINT mouse_move;
+	} input;
 	struct {
 		SDL_Event event;
 		BOOL running;
@@ -46,19 +47,24 @@ struct {
 static void
 capture_input()
 {
-	// use GetAsyncKeyState for input instead of built in SDL inputs
-	// so it still works when the window closes
-	state.keys.W = GetAsyncKeyState('W') & 0x8000;
-	state.keys.A = GetAsyncKeyState('A') & 0x8000;
-	state.keys.S = GetAsyncKeyState('S') & 0x8000;
-	state.keys.D = GetAsyncKeyState('D') & 0x8000;
-	state.keys.SPACE = GetAsyncKeyState(' ') & 0x8000;
-	state.keys.LSHIFT = GetAsyncKeyState(VK_LSHIFT) & 0x8000;
-	state.keys.UP = GetAsyncKeyState(VK_UP) & 0x8000;
-	state.keys.LEFT = GetAsyncKeyState(VK_LEFT) & 0x8000;
-	state.keys.DOWN = GetAsyncKeyState(VK_DOWN) & 0x8000;
-	state.keys.RIGHT = GetAsyncKeyState(VK_RIGHT) & 0x8000;
-	state.keys.ESC = GetAsyncKeyState(VK_ESCAPE) & 0x8000;
+	// get relative mouse position
+	POINT mouse_pos;
+	GetCursorPos(&mouse_pos);
+	state.input.mouse_move.x =  mouse_pos.x - 100;
+	state.input.mouse_move.y =  mouse_pos.y - 100;
+	SetCursorPos(100, 100);
+	// get keyboard input
+	state.input.W = GetAsyncKeyState('W') & 0x8000;
+	state.input.A = GetAsyncKeyState('A') & 0x8000;
+	state.input.S = GetAsyncKeyState('S') & 0x8000;
+	state.input.D = GetAsyncKeyState('D') & 0x8000;
+	state.input.SPACE = GetAsyncKeyState(' ') & 0x8000;
+	state.input.LSHIFT = GetAsyncKeyState(VK_LSHIFT) & 0x8000;
+	state.input.UP = GetAsyncKeyState(VK_UP) & 0x8000;
+	state.input.LEFT = GetAsyncKeyState(VK_LEFT) & 0x8000;
+	state.input.DOWN = GetAsyncKeyState(VK_DOWN) & 0x8000;
+	state.input.RIGHT = GetAsyncKeyState(VK_RIGHT) & 0x8000;
+	state.input.ESC = GetAsyncKeyState(VK_ESCAPE) & 0x8000;
 }
 
 static void
@@ -71,26 +77,21 @@ move_camera()
 	float roll = cam_angle[2];
 	float dt = state.loop.delta_time;
 
-	if (state.keys.W)
+	if (state.input.W)
 		camera_translatew((vec3) { dt * SPEED * cosf(yaw), 0, dt * SPEED * sinf(yaw) });
-	if (state.keys.S)
+	if (state.input.S)
 		camera_translatew((vec3) { dt * SPEED * -cosf(yaw), 0, dt * SPEED * -sinf(yaw) });
-	if (state.keys.A)
+	if (state.input.A)
 		camera_translatew((vec3) { dt * SPEED * sinf(yaw), 0, dt * SPEED * -cosf(yaw) });
-	if (state.keys.D)
+	if (state.input.D)
 		camera_translatew((vec3) { dt * SPEED * -sinf(yaw), 0, dt * SPEED * cosf(yaw) });
-	if (state.keys.SPACE)
+	if (state.input.SPACE)
 		camera_translatew((vec3) { 0, dt * SPEED, 0 });
-	if (state.keys.LSHIFT)
+	if (state.input.LSHIFT)
 		camera_translatew((vec3) { 0, dt * -SPEED, 0 });
-	if (state.keys.UP)
-		camera_rotate_rad((vec3) { dt * SENS, 0, 0 });
-	if (state.keys.DOWN)
-		camera_rotate_rad((vec3) { dt * -SENS, 0, 0 });
-	if (state.keys.LEFT)
-		camera_rotate_rad((vec3) { 0, dt * -SENS, 0 });
-	if (state.keys.RIGHT)
-		camera_rotate_rad((vec3) { 0, dt * SENS, 0 });
+
+	camera_rotate_rad((vec3) { -state.input.mouse_move.y * dt * SENS, 0, 0 });
+	camera_rotate_rad((vec3) { 0, state.input.mouse_move.x * dt * SENS, 0 });
 
 	camera_euler(cam_angle);
 	pitch = cam_angle[0];
@@ -149,7 +150,7 @@ tick()
 	capture_input();
 	move_camera();
 
-	if (state.keys.ESC) state.loop.running = FALSE;
+	if (state.input.ESC) state.loop.running = FALSE;
 }
 
 static void
@@ -171,7 +172,9 @@ run()
 	state.loop.running = TRUE;
 
 	while (state.loop.running) {
-		while (SDL_PollEvent(&state.loop.event)) state.loop.running = state.loop.event.type != SDL_QUIT;
+		while (SDL_PollEvent(&state.loop.event)) {
+			state.loop.running = state.loop.event.type != SDL_QUIT;
+		}
 
 		LARGE_INTEGER now;
 		QueryPerformanceCounter(&now);

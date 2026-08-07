@@ -27,7 +27,7 @@ context_init(int width, int height)
 	// window width and height are scaled up because S_WIDTH and S_HEIGHT 
 	// are the screen width/height in characters, not pixels
 	if (!(win = SDL_CreateWindow("", 
-		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
+		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
 		1, 1, 
 		SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN))) {
 		fprintf(stderr, "Failed to create window: %s\n", SDL_GetError());
