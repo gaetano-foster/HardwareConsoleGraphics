@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "utils.h"
-#include "render_target.h"
 #include "config.h"
+#include "render_target.h"
 
 static struct {
 	GLuint fbo;

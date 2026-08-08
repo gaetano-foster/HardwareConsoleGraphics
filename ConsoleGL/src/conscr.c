@@ -1,7 +1,6 @@
 ﻿#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <glad/glad.h>
-#include <Windows.h>
 #include "conscr.h"
 #include "render_target.h"
 #include "config.h"
@@ -83,6 +82,7 @@ append_color(char *p,
 		goto block;
 	}
 
+	// "\x1b[38;2;255;255;255mEEEEEEEEEEEE"
 	*p++ = '\x1b';
 	*p++ = '[';
 	*p++ = '3';

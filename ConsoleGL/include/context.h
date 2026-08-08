@@ -1,5 +1,6 @@
 #ifndef __CONTEXT_H__
 #define __CONTEXT_H__
+#include <Windows.h>
 
 /*
 Opens an invisible SDL Window and initializes OpenGL

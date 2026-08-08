@@ -1,6 +1,4 @@
 #define _CRT_SECURE_NO_WARNINGS
-#include <glad/glad.h>
-#include <cglm/cglm.h>
 #include <Windows.h>
 #include <stdio.h>
 #include <assimp/cimport.h>

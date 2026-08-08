@@ -1,5 +1,6 @@
 #ifndef __TEXTURE_H__
 #define __TEXTURE_H__
+#include <glad/glad.h>
 
 /*
 Wrapper for OpenGL texture object

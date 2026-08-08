@@ -1,5 +1,7 @@
 #ifndef __CAMERA_H__
 #define __CAMERA_H__
+#include <cglm/cglm.h>
+#include <cglm/mat4.h>
 
 /*
 Represents user-defined settings for the global camera

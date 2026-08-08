@@ -1,10 +1,4 @@
-#include <cglm/cglm.h>
-#include <cglm/struct.h>
-#include <glad/glad.h>
 #include <Windows.h>
-#include "mesh.h"
-#include "shader.h"
-#include "texture.h"
 #include "object.h"
 #include "camera.h"
 

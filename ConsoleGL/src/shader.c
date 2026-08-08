@@ -1,8 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
-#include <glad/glad.h>
-#include <cglm/cglm.h>
-#include <stdio.h>
 #include <Windows.h>
+#include <stdio.h>
+#include <cglm/cglm.h>
 #include "shader.h"
 #include "utils.h"
 #include "camera.h"

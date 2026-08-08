@@ -1,5 +1,7 @@
 #ifndef __MESH_H__
 #define __MESH_H__
+#include <glad/glad.h>
+#include <cglm/cglm.h>
 
 /*
 Structure for storing Mesh data

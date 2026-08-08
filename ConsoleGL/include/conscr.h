@@ -1,5 +1,6 @@
 ﻿#ifndef __CONSOLE_SCREEN__
 #define __CONSOLE_SCREEN__
+#include <Windows.h>
 	
 #define CELL_MAX_BYTES		(32)
 #define HUD_MAX_LEN			(256)

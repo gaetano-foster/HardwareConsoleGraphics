@@ -1,5 +1,3 @@
-#include <cglm/cglm.h>
-#include <cglm/mat4.h>
 #include "camera.h"
 
 static struct camera_t {

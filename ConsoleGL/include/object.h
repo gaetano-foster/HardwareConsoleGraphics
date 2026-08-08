@@ -1,5 +1,9 @@
 #ifndef __OBJECT_H__
 #define __OBJECT_H__
+#include <cglm/cglm.h>
+#include "mesh.h"
+#include "shader.h"
+#include "texture.h"
 
 /*
 Represents a graphical object

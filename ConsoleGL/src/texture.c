@@ -1,4 +1,3 @@
-#include <glad/glad.h>
 #include <Windows.h>
 #include "stb_image.h"
 #include "texture.h"
