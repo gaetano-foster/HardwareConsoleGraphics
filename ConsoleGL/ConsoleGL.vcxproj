@@ -142,6 +142,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\chunk.c" />
     <ClCompile Include="src\config.c" />
     <ClCompile Include="dep\src\glad.c" />
     <ClCompile Include="src\camera.c" />
@@ -156,6 +157,7 @@
     <ClCompile Include="src\texture.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\chunk.h" />
     <ClInclude Include="include\config.h" />
     <ClInclude Include="include\camera.h" />
     <ClInclude Include="include\conscr.h" />

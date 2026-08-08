@@ -51,6 +51,9 @@
     <ClCompile Include="src\config.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\chunk.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\camera.h">
@@ -84,6 +87,9 @@
       <Filter>Include</Filter>
     </ClInclude>
     <ClInclude Include="include\config.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\chunk.h">
       <Filter>Include</Filter>
     </ClInclude>
   </ItemGroup>
