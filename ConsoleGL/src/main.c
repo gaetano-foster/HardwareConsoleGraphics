@@ -14,9 +14,7 @@
 #include "object.h"
 #include "camera.h"
 #include "render_target.h"
-// include shaders at compile time
-#include "block.vs.h"
-#include "block.fs.h"
+#include "chunk.h"
 
 #define SPEED		(5)
 #define SENS		(.5f)
@@ -41,7 +39,7 @@ struct {
 		INT32 tps;
 		INT32 fps;
 	} loop;
-	object_t cube;
+	chunk_t chunk;
 } state;
 
 static void
@@ -107,17 +105,11 @@ init()
 {
 	EXPECT(configure("cmd_render.cfg"));
 	EXPECT(conscr_init());
-	// build teapot object
-	EXPECT(state.cube.shader = shader_compile(block_vs, block_fs));
-	EXPECT(state.cube.mesh = mesh_load("res/cube.obj"));
-	EXPECT(state.cube.texture = texture_load("res/grass.jpg"));
-	object_init(&state.cube);
-	object_setpos(&state.cube, (vec3) { 0.0f, 0.0f, -1.0f });
 	// configure camera
 	struct camera_config_t config = {
-		.x = -0.5,
-		.y = 0,
-		.z = -0.5,
+		.x = 8.0,
+		.y = 256.0,
+		.z = 8.0,
 		.pitch = 0,
 		.yaw = 0,
 		.roll = 0,
@@ -125,6 +117,8 @@ init()
 		.aspect = (float)S_WIDTH / (float)S_HEIGHT
 	};
 	camera_init(config);
+	tiles_init();
+	chunk_init(state.chunk);
 	// initialize loop variables
 	QueryPerformanceFrequency(&state.loop.freq);
 	QueryPerformanceCounter(&state.loop.last_time);
@@ -154,7 +148,7 @@ render()
 	// draw
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	object_draw(&state.cube);
+	chunk_render(state.chunk);
 	conscr_render();
 	CONSCR_HUD_FMT("FPS: %d", state.loop.fps);
 	conscr_renderhud();
@@ -205,9 +199,7 @@ run()
 void
 cleanup()
 {
-	mesh_cleanup(state.cube.mesh);
-	shader_cleanup(state.cube.shader);
-	texture_cleanup(state.cube.texture);
+	tiles_destroy();
 	conscr_destroy();
 }
 
