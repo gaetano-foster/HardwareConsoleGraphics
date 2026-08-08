@@ -51,6 +51,8 @@ context_init()
 	}
 	glEnable(GL_DEPTH_TEST); 
 	SDL_GL_SetSwapInterval(0);
+	glEnable(GL_CULL_FACE);  
+	glCullFace(GL_FRONT);
 
 	return TRUE;
 }
