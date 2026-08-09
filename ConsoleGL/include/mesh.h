@@ -30,6 +30,24 @@ typedef struct _vertex_t {
 } vertex_t;
 
 /*
+Constructs a mesh from user defined data
+
+Parameters:
+	- mesh_t *mesh: output value
+	- vertex_t *vertices: array of vertices to be read
+	- GLuint *indices: array of indices to be read
+	- GLsizei vsize: size of vertices array
+	- GLsizei isize: size of indices array
+	
+*/
+void
+mesh_build(mesh_t *mesh,
+	vertex_t *vertices,
+	GLuint *indices,
+	GLsizei vsize,
+	GLsizei isize);
+
+/*
 Returns heap allocated pointer to mesh read in from file at path
 that must be freed with mesh_cleanup
 */

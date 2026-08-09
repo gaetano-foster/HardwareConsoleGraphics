@@ -7,7 +7,7 @@
 #include "mesh.h"
 #include "utils.h"
 
-static void
+void
 mesh_build(mesh_t *mesh,
 	vertex_t *vertices,
 	GLuint *indices,
