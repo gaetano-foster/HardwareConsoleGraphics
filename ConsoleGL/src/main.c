@@ -118,7 +118,7 @@ init()
 	};
 	camera_init(config);
 	tiles_init();
-	chunk_init(state.chunk);
+	chunk_init(&state.chunk);
 	// initialize loop variables
 	QueryPerformanceFrequency(&state.loop.freq);
 	QueryPerformanceCounter(&state.loop.last_time);
@@ -148,7 +148,7 @@ render()
 	// draw
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	chunk_render(state.chunk);
+	chunk_render(&state.chunk);
 	conscr_render();
 	CONSCR_HUD_FMT("FPS: %d", state.loop.fps);
 	conscr_renderhud();
@@ -200,6 +200,7 @@ void
 cleanup()
 {
 	tiles_destroy();
+	chunk_cleanup(&state.chunk);
 	conscr_destroy();
 }
 
