@@ -10,7 +10,8 @@
 
 typedef enum _TILE_ID {
 	TILE_AIR = 0,
-	TILE_GRASS = 1
+	TILE_GRASS = 1,
+	TILE_DIRT = 2
 } TILE_ID;
 
 /*

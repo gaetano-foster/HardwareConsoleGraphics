@@ -41,6 +41,17 @@ tiles_init()
 			{ ATLAS_OFFSET(1, 0), ATLAS_OFFSET(2, 0), ATLAS_OFFSET(1, 1), ATLAS_OFFSET(2, 1) }
 		}
 	};
+	TILE_SET[TILE_DIRT] = (tile_t) {
+		.solid = TRUE,
+		.uv_set = {
+			{ ATLAS_OFFSET(2, 0), ATLAS_OFFSET(3, 0), ATLAS_OFFSET(2, 1), ATLAS_OFFSET(3, 1) }, // top (0)
+			{ ATLAS_OFFSET(2, 0), ATLAS_OFFSET(3, 0), ATLAS_OFFSET(2, 1), ATLAS_OFFSET(3, 1) }, // bottom (1)
+			{ ATLAS_OFFSET(2, 0), ATLAS_OFFSET(3, 0), ATLAS_OFFSET(2, 1), ATLAS_OFFSET(3, 1) }, // sides (2-5)
+			{ ATLAS_OFFSET(2, 0), ATLAS_OFFSET(3, 0), ATLAS_OFFSET(2, 1), ATLAS_OFFSET(3, 1) },
+			{ ATLAS_OFFSET(2, 0), ATLAS_OFFSET(3, 0), ATLAS_OFFSET(2, 1), ATLAS_OFFSET(3, 1) },
+			{ ATLAS_OFFSET(2, 0), ATLAS_OFFSET(3, 0), ATLAS_OFFSET(2, 1), ATLAS_OFFSET(3, 1) }
+	}
+	};
 }
 
 void
@@ -68,7 +79,8 @@ chunk_init(chunk_t *chunk)
 	for (int y = 0; y < 256; y++) {
 		for (int z = 0; z < 16; z++) {
 			for (int x = 0; x < 16; x++) {
-				chunk->tiles[x][z][y] = TILE_GRASS;
+				if (y == 255) chunk->tiles[x][z][y] = TILE_GRASS;
+				else chunk->tiles[x][z][y] = TILE_DIRT;
 			}
 		}
 	}
@@ -180,12 +192,12 @@ add_bottom_face(chunk_t *chunk,
 		.normal = { 0.0, -1.0, 0.0 }
 	};
 
-	chunk->indices[chunk->isize++] = base + 3;
+	chunk->indices[chunk->isize++] = base + 0;
 	chunk->indices[chunk->isize++] = base + 1;
-	chunk->indices[chunk->isize++] = base + 0;
-	chunk->indices[chunk->isize++] = base + 2;
 	chunk->indices[chunk->isize++] = base + 3;
 	chunk->indices[chunk->isize++] = base + 0;
+	chunk->indices[chunk->isize++] = base + 3;
+	chunk->indices[chunk->isize++] = base + 2;
 }
 
 static void
@@ -232,12 +244,12 @@ add_front_face(chunk_t *chunk,
 		.normal = { 0.0, 0.0, 1.0 }
 	};
 
-	chunk->indices[chunk->isize++] = base + 3;
+	chunk->indices[chunk->isize++] = base + 0;
 	chunk->indices[chunk->isize++] = base + 1;
-	chunk->indices[chunk->isize++] = base + 0;
-	chunk->indices[chunk->isize++] = base + 2;
 	chunk->indices[chunk->isize++] = base + 3;
 	chunk->indices[chunk->isize++] = base + 0;
+	chunk->indices[chunk->isize++] = base + 3;
+	chunk->indices[chunk->isize++] = base + 2;
 }
 
 static void
@@ -388,12 +400,12 @@ add_left_face(chunk_t *chunk,
 		.normal = { -1.0, 0.0, 0.0 }
 	};
 
-	chunk->indices[chunk->isize++] = base + 3;
+	chunk->indices[chunk->isize++] = base + 0;
 	chunk->indices[chunk->isize++] = base + 1;
-	chunk->indices[chunk->isize++] = base + 0;
-	chunk->indices[chunk->isize++] = base + 2;
 	chunk->indices[chunk->isize++] = base + 3;
 	chunk->indices[chunk->isize++] = base + 0;
+	chunk->indices[chunk->isize++] = base + 3;
+	chunk->indices[chunk->isize++] = base + 2;
 }
 
 void

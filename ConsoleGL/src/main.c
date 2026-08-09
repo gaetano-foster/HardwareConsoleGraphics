@@ -16,7 +16,7 @@
 #include "render_target.h"
 #include "chunk.h"
 
-#define SPEED		(5)
+#define SPEED		(50)
 #define SENS		(.5f)
 
 struct {
