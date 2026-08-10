@@ -158,10 +158,18 @@ mesh_draw(mesh_t *mesh)
 }
 
 void 
-mesh_cleanup(mesh_t *mesh)
+mesh_destroy(mesh_t *mesh)
 {
 	glDeleteVertexArrays(1, &mesh->vao);
 	glDeleteBuffers(1, &mesh->vbo);
 	glDeleteBuffers(1, &mesh->ebo);
     free(mesh);
+}
+
+void
+mesh_cleanup(mesh_t *mesh)
+{
+    glDeleteVertexArrays(1, &mesh->vao);
+    glDeleteBuffers(1, &mesh->vbo);
+    glDeleteBuffers(1, &mesh->ebo);
 }

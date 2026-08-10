@@ -55,7 +55,13 @@ mesh_t *
 mesh_load(const char *path);
 
 /*
-Frees memory associated with mesh
+Cleans up GPU memory associated with mesh and frees the pointer
+*/
+void
+mesh_destroy(mesh_t *mesh);
+
+/*
+Cleans up GPU memory associated with mesh
 */
 void
 mesh_cleanup(mesh_t *mesh);
