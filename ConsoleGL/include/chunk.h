@@ -40,6 +40,8 @@ tiles_destroy();
 
 typedef struct _chunk_t {
 	TILE_ID tiles[16][16][256];
+	vec2 offset;
+	BOOL loaded;
 	// mesh data
 	mesh_t *chunk_mesh;
 	vertex_t *vertices;
@@ -53,8 +55,8 @@ typedef struct _chunk_t {
 /*
 Initializes and builds initial chunk mesh
 */
-void
-chunk_init(chunk_t *chunk);
+chunk_t *
+chunk_init(vec2 offset);
 
 /*
 Rebuilds chunk mesh

@@ -65,15 +65,19 @@ tiles_destroy()
 /// Chunk Implementation
 //
 
-void
-chunk_init(chunk_t *chunk)
+chunk_t *
+chunk_init(vec2 offset)
 {
+	chunk_t *chunk = malloc(sizeof(chunk_t));
+	EXPECT(chunk);
 	// initialize memory
 	chunk->chunk_mesh = malloc(sizeof(mesh_t));
 	chunk->vertices = malloc(INT16_MAX * sizeof(vertex_t));
 	chunk->indices = malloc(INT16_MAX * sizeof(GLuint));
 	chunk->vcapacity = INT16_MAX;
 	chunk->icapacity = INT16_MAX;
+	chunk->loaded = TRUE;
+	glm_vec2_copy(offset, chunk->offset);
 	EXPECT(chunk->chunk_mesh && chunk->vertices && chunk->indices);
 	// initialize tiles
 	for (int y = 0; y < 256; y++) {
@@ -86,23 +90,25 @@ chunk_init(chunk_t *chunk)
 	}
 	// build chunk mesh
 	chunk_rebuild(chunk);
+	return chunk;
 }
 
 void 
 chunk_cleanup(chunk_t *chunk)
 {
-	mesh_cleanup(chunk->chunk_mesh);
+	mesh_destroy(chunk->chunk_mesh);
 	free(chunk->vertices);
 	free(chunk->indices);
+	free(chunk);
 }
 
 static void
 add_top_face(chunk_t *chunk, 
 	int x, int y, int z)
 {
+	if (!chunk) return;
 	GLsizei base = chunk->vsize;
 	TILE_ID id = chunk_tileat(chunk, x, y, z);
-	if (!chunk) return;
 
 	if (chunk->vsize + 4 >= chunk->vcapacity) {
 		chunk->vcapacity *= 2;
@@ -152,9 +158,9 @@ static void
 add_bottom_face(chunk_t *chunk, 
 	int x, int y, int z)
 {
+	if (!chunk) return;
 	GLsizei base = chunk->vsize;
 	TILE_ID id = chunk_tileat(chunk, x, y, z);
-	if (!chunk) return;
 
 	if (chunk->vsize + 4 >= chunk->vcapacity) {
 		chunk->vcapacity *= 2;
@@ -204,9 +210,9 @@ static void
 add_front_face(chunk_t *chunk, 
 	int x, int y, int z)
 {
+	if (!chunk) return;
 	GLsizei base = chunk->vsize;
 	TILE_ID id = chunk_tileat(chunk, x, y, z);
-	if (!chunk) return;
 
 	if (chunk->vsize + 4 >= chunk->vcapacity) {
 		chunk->vcapacity *= 2;
@@ -256,9 +262,9 @@ static void
 add_back_face(chunk_t *chunk, 
 	int x, int y, int z)
 {
+	if (!chunk) return;
 	GLsizei base = chunk->vsize;
 	TILE_ID id = chunk_tileat(chunk, x, y, z);
-	if (!chunk) return;
 
 	if (chunk->vsize + 4 >= chunk->vcapacity) {
 		chunk->vcapacity *= 2;
@@ -308,9 +314,9 @@ static void
 add_right_face(chunk_t *chunk, 
 	int x, int y, int z)
 {
+	if (!chunk) return;
 	GLsizei base = chunk->vsize;
 	TILE_ID id = chunk_tileat(chunk, x, y, z);
-	if (!chunk) return;
 
 	if (chunk->vsize + 4 >= chunk->vcapacity) {
 		chunk->vcapacity *= 2;
@@ -360,9 +366,9 @@ static void
 add_left_face(chunk_t *chunk, 
 	int x, int y, int z)
 {
+	if (!chunk) return;
 	GLsizei base = chunk->vsize;
 	TILE_ID id = chunk_tileat(chunk, x, y, z);
-	if (!chunk) return;
 
 	if (chunk->vsize + 4 >= chunk->vcapacity) {
 		chunk->vcapacity *= 2;
@@ -425,6 +431,7 @@ chunk_rebuild(chunk_t *chunk)
 			}
 		}
 	}
+	mesh_cleanup(chunk->chunk_mesh);
 	mesh_build(chunk->chunk_mesh, 
 		chunk->vertices, 
 		chunk->indices,
@@ -446,11 +453,13 @@ chunk_tileat(chunk_t *chunk,
 void
 chunk_render(chunk_t *chunk)
 {
+	if (!chunk->loaded) return;
 	object_t chunk_object = (object_t){
 		.mesh = chunk->chunk_mesh,
 		.texture = atlas,
 		.shader = tile_shader
 	};
 	object_init(&chunk_object);
+	object_translatew(&chunk_object, (vec3) { chunk->offset[0], 0, chunk->offset[1] });
 	object_draw(&chunk_object);
 }
