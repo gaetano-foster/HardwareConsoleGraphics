@@ -118,7 +118,7 @@ init()
 	};
 	camera_init(config);
 	tiles_init();
-	chunk_init(&state.chunk);
+	chunk_init(&state.chunk, (vec2) { 0, 0 });
 	// initialize loop variables
 	QueryPerformanceFrequency(&state.loop.freq);
 	QueryPerformanceCounter(&state.loop.last_time);
