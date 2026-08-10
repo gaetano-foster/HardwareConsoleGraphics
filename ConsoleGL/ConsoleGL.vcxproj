@@ -155,6 +155,7 @@
     <ClCompile Include="src\shader.c" />
     <ClCompile Include="dep\src\stb_image.c" />
     <ClCompile Include="src\texture.c" />
+    <ClCompile Include="src\world.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\chunk.h" />
@@ -169,6 +170,7 @@
     <ClInclude Include="include\stb_image.h" />
     <ClInclude Include="include\texture.h" />
     <ClInclude Include="include\utils.h" />
+    <ClInclude Include="include\world.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cmd_render.cfg" />
