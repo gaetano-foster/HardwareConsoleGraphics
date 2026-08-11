@@ -72,18 +72,20 @@ chunk_init(vec2 offset)
 	EXPECT(chunk);
 	// initialize memory
 	chunk->chunk_mesh = malloc(sizeof(mesh_t));
-	chunk->vertices = malloc(INT16_MAX * sizeof(vertex_t));
-	chunk->indices = malloc(INT16_MAX * sizeof(GLuint));
-	chunk->vcapacity = INT16_MAX;
-	chunk->icapacity = INT16_MAX;
+	chunk->vertices = malloc(1000 * sizeof(vertex_t));
+	chunk->indices = malloc(1000 * sizeof(GLuint));
+	chunk->vcapacity = 1000;
+	chunk->icapacity = 1000;
 	chunk->loaded = TRUE;
 	glm_vec2_copy(offset, chunk->offset);
 	EXPECT(chunk->chunk_mesh && chunk->vertices && chunk->indices);
 	// initialize tiles
-	for (int y = 0; y < 256; y++) {
-		for (int z = 0; z < 16; z++) {
-			for (int x = 0; x < 16; x++) {
-				if (y == 255) chunk->tiles[x][z][y] = TILE_GRASS;
+	memset(chunk->tiles, 0, sizeof(chunk->tiles));
+	for (int z = 0; z < CHUNK_Z; z++) {
+		for (int x = 0; x < CHUNK_X; x++) {
+			int height = 200 + (sinf((chunk->offset[0] + x) * 0.2f) * cosf((chunk->offset[1] + z) * 0.2f) * 20);
+			for (int y = 0; y < height; y++) {
+				if (y == height - 1) chunk->tiles[x][z][y] = TILE_GRASS;
 				else chunk->tiles[x][z][y] = TILE_DIRT;
 			}
 		}
@@ -419,15 +421,16 @@ chunk_rebuild(chunk_t *chunk)
 {
 	chunk->vsize = 0;
 	chunk->isize = 0;
-	for (int y = 0; y < 256; y++) {
-		for (int z = 0; z < 16; z++) {
-			for (int x = 0; x < 16; x++) {
-				if (!chunk_tileat(chunk, x, y + 1, z)) add_top_face(chunk, x, y, z);
-				if (!chunk_tileat(chunk, x, y - 1, z)) add_bottom_face(chunk, x, y, z);
-				if (!chunk_tileat(chunk, x, y, z + 1)) add_front_face(chunk, x, y, z);
-				if (!chunk_tileat(chunk, x, y, z - 1)) add_back_face(chunk, x, y, z);
-				if (!chunk_tileat(chunk, x + 1, y, z)) add_right_face(chunk, x, y, z);
-				if (!chunk_tileat(chunk, x - 1, y, z)) add_left_face(chunk, x, y, z);
+	for (int y = 0; y < CHUNK_Y; y++) {
+		for (int z = 0; z < CHUNK_Z; z++) {
+			for (int x = 0; x < CHUNK_X; x++) {
+				if (TILE_AIR == chunk_tileat(chunk, x, y, z)) continue;
+				if (TILE_AIR == chunk_tileat(chunk, x, y + 1, z)) add_top_face(chunk, x, y, z);
+				if (TILE_AIR == chunk_tileat(chunk, x, y - 1, z)) add_bottom_face(chunk, x, y, z);
+				if (TILE_AIR == chunk_tileat(chunk, x, y, z + 1)) add_front_face(chunk, x, y, z);
+				if (TILE_AIR == chunk_tileat(chunk, x, y, z - 1)) add_back_face(chunk, x, y, z);
+				if (TILE_AIR == chunk_tileat(chunk, x + 1, y, z)) add_right_face(chunk, x, y, z);
+				if (TILE_AIR == chunk_tileat(chunk, x - 1, y, z)) add_left_face(chunk, x, y, z);
 			}
 		}
 	}

@@ -15,6 +15,7 @@
 #include "camera.h"
 #include "render_target.h"
 #include "chunk.h"
+#include "world.h"
 
 #define SPEED		(50)
 #define SENS		(.5f)
@@ -39,7 +40,7 @@ struct {
 		INT32 tps;
 		INT32 fps;
 	} loop;
-	chunk_t chunk;
+	world_t *world;
 } state;
 
 static void
@@ -118,7 +119,6 @@ init()
 	};
 	camera_init(config);
 	tiles_init();
-	chunk_init(&state.chunk, (vec2) { 0, 0 });
 	// initialize loop variables
 	QueryPerformanceFrequency(&state.loop.freq);
 	QueryPerformanceCounter(&state.loop.last_time);
@@ -130,6 +130,7 @@ init()
 	state.loop.frames = 0;
 	state.loop.fps = 0;
 	state.loop.tps = state.loop.target_tps;
+	state.world = world_init();
 }
 
 static void
@@ -137,6 +138,7 @@ tick()
 {
 	capture_input();
 	move_camera();
+	world_tick(state.world);
 
 	if (state.input.ESC) state.loop.running = FALSE;
 }
@@ -146,9 +148,9 @@ render()
 {
 	render_target_bind();
 	// draw
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	chunk_render(&state.chunk);
+	world_render(state.world);
 	conscr_render();
 	CONSCR_HUD_FMT("FPS: %d", state.loop.fps);
 	conscr_renderhud();
@@ -200,7 +202,7 @@ void
 cleanup()
 {
 	tiles_destroy();
-	chunk_cleanup(&state.chunk);
+	world_cleanup(state.world);
 	conscr_destroy();
 }
 
