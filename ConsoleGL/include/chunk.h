@@ -3,6 +3,9 @@
 #include <Windows.h>
 #include "mesh.h"
 #include "texture.h"
+#define CHUNK_X		(16)
+#define CHUNK_Z		(16)
+#define CHUNK_Y		(256)
 
 ////
 /// Tile
@@ -39,7 +42,7 @@ tiles_destroy();
 //
 
 typedef struct _chunk_t {
-	TILE_ID tiles[16][16][256];
+	TILE_ID tiles[CHUNK_X][CHUNK_Z][CHUNK_Y];
 	vec2 offset;
 	BOOL loaded;
 	// mesh data
