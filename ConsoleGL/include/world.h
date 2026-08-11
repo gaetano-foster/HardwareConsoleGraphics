@@ -1,6 +1,7 @@
 #ifndef __WORLD_H__
 #define __WORLD_H__
 #include "chunk.h"
+#define RENDER_DISTANCE			(2)
 
 struct cnode_t {
 	int x;
@@ -28,6 +29,9 @@ world_chunk(world_t *world,
 chunk_t *
 world_genchunk(world_t *world,
 	int x_offset, int z_offset);
+
+void 
+world_tick(world_t *world);
 
 void
 world_render(world_t *world);

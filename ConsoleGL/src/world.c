@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include "utils.h"
+#include "camera.h"
 #include "world.h"
 
 ////
@@ -94,7 +95,7 @@ world_genchunk(world_t *world,
 		world_rehash(world);
 	}
 	// allocate chunk
-	chunk_t *chunk = chunk_init((vec2) { x_offset, z_offset });
+	chunk_t *chunk = chunk_init((vec2) { x_offset * CHUNK_X, z_offset * CHUNK_Z });
 	EXPECT(chunk);
 	// allocate node
 	struct cnode_t *node = malloc(sizeof(struct cnode_t));
@@ -109,6 +110,38 @@ world_genchunk(world_t *world,
 	world->chunks[slot] = node;
 	world->csize++;
 	return chunk;
+}
+
+void 
+world_tick(world_t *world)
+{
+	vec3 cam_pos;
+	camera_pos(cam_pos);
+	int cx = floor(cam_pos[0] / CHUNK_X);
+	int cz = floor(cam_pos[2] / CHUNK_Z);
+
+	// load/generate nearby chunks
+	for (int z = cz - RENDER_DISTANCE; z <= cz + RENDER_DISTANCE; z++) {
+		for (int x = cx - RENDER_DISTANCE; x <= cx + RENDER_DISTANCE; x++) {
+			chunk_t *chunk = world_chunk(world, x, z);
+			chunk->loaded = TRUE;
+		}
+	}
+
+	// unload distant chunks
+	for (int i = 0; i < world->ccapacity; i++) {
+		struct cnode_t *entry = world->chunks[i];
+
+		while (entry) {
+			int dx = entry->x - cx;
+			int dz = entry->z - cz;
+
+			if (dx < -RENDER_DISTANCE || dx > RENDER_DISTANCE || dz < -RENDER_DISTANCE || dz > RENDER_DISTANCE)
+				entry->chunk->loaded = FALSE;
+
+			entry = entry->next;
+		}
+	}
 }
 
 void
